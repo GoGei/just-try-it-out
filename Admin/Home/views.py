@@ -4,4 +4,4 @@ from core.Utils.Access.decorators import manager_required
 
 @manager_required
 def home_index(request):
-    return render(request, 'Admin/home_index.html')
+    return render(request, 'Admin/Home/home_index.html')

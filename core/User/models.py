@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from django.db import models
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 from core.Utils.Mixins.models import HashableMixin
@@ -67,3 +68,20 @@ class User(AbstractBaseUser, HashableMixin):
 
     def __str__(self):
         return self.email or self.id
+
+    @property
+    def label(self):
+        result = ' '.join(list(filter(lambda x: bool(x), [self.first_name, self.last_name])))
+        if not result:
+            result = str(self)
+        return result
+
+    @property
+    def role_label(self):
+        if self.is_superuser:
+            result = _('Superuser')
+        elif self.is_staff:
+            result = _('Manager')
+        else:
+            result = _('User')
+        return result
