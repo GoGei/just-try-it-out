@@ -14,7 +14,7 @@ PARENT_HOST = ".%s" % SITE_URL
 HOST_PORT = '4482'
 SITE = "%s://%s:%s" % (SITE_SCHEME, SITE_URL, HOST_PORT)
 
-DATABASES['default']['PASSWORD'] = 'just_try_it_out'
+DATABASES['default']['PASSWORD'] = 'your_db_password'
 
 EMAIL_HOST_USER = 'user@example.com'
 DEFAULT_FROM_EMAIL = 'user@example.com'
