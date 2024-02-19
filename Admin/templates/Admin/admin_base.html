@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+{% load static i18n hosts %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+
+  <title>{% trans 'Just try it out' %} {% block title %}| {% trans 'Admin' %}{% endblock %}</title>
+
+  <link href="{% static 'inspinia/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'inspinia/fonts/googleapis.css' %}" rel="stylesheet"/>
+  <link href="{% static 'inspinia/font-awesome/css/font-awesome.css' %}" rel="stylesheet">
+  <link href="{% static 'css/font-mfizz-2.4.1/font-mfizz.css' %}" rel="stylesheet">
+
+  <link href="{% static 'inspinia/css/animate.css' %}" rel="stylesheet">
+  <link href="{% static 'inspinia/css/style.css' %}" rel="stylesheet">
+
+  {% block extra-css %}
+  {% endblock %}
+
+</head>
+
+<body>
+<div id="wrapper">
+  <nav class="navbar-default navbar-static-side" role="navigation">
+    <div class="sidebar-collapse">
+      <ul class="nav metismenu" id="side-menu">
+        <li class="nav-header">
+          <div class="dropdown profile-element"> 
+            <span>
+              <img alt="image" class="img-circle" src="{% static 'inspinia/img/profile_small.jpg' %}">
+            </span>
+            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+              <span class="clear"> <span class="block m-t-xs"> <strong
+                  class="font-bold">{{ request.user.label }}</strong>
+               </span> <span class="text-muted text-xs block">{{ request.user.role_label }} <b
+                  class="caret"></b></span> </span> </a>
+            <ul class="dropdown-menu animated fadeInRight m-t-xs">
+              <li><a href="#">{% trans 'Profile' %}</a></li>
+              <li class="divider"></li>
+              <li><a href="{% host_url 'admin-logout' host 'admin' %}">{% trans 'Logout' %}</a></li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="{% block menu-home-active %}{% endblock %}">
+          <a href="{% host_url 'admin-index' host 'admin' %}">
+            <i class="fa fa-home"></i>
+            <span class="nav-label">{% trans 'Home' %}</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div id="page-wrapper" class="gray-bg">
+    <div class="row border-bottom">
+      <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+          <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
+          <form role="search" class="navbar-form-custom"
+                action="">
+            <div class="form-group">
+              <input type="text" placeholder="{% trans 'Search for something...' %}" class="form-control"
+                     name="top-search" id="top-search">
+            </div>
+          </form>
+        </div>
+        <ul class="nav navbar-top-links navbar-right">
+          <li>
+            <a href="{% host_url 'admin-logout' host 'admin' %}">
+              <i class="fa fa-sign-out"></i> {% trans 'Log out' %}
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div class="row wrapper border-bottom white-bg page-heading">
+      <div class="col-lg-10">
+        <h2>{% block page-title %}{% trans 'Home' %}{% endblock %}</h2>
+        <ol class="breadcrumb">
+          {% block breadcrumb %}
+            <li>
+              <a href="{% host_url 'admin-index' host 'admin' %}">{% trans 'Home' %}</a>
+            </li>
+            <li class="active">
+              <a href="{% host_url 'admin-index' host 'admin' %}">{% trans 'Home' %}</a>
+            </li>
+          {% endblock %}
+        </ol>
+      </div>
+    </div>
+
+
+    <div class="wrapper wrapper-content animated fadeInRight">
+      {% block content %}
+      {% endblock %}
+    </div>
+    <div class="footer">
+      <div>
+        <strong>{% trans 'Copyright' %}</strong> {% trans 'Just try it out' %} © {% now 'Y' %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- Mainly scripts -->
+{#<script src="{% static 'inspinia/js/jquery-2.1.1.js' %}"></script>#}
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'inspinia/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'inspinia/js/plugins/metisMenu/jquery.metisMenu.js' %}"></script>
+<script src="{% static 'inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+
+<!-- Custom and plugin javascript -->
+<script src="{% static 'inspinia/js/inspinia.js' %}"></script>
+<script src="{% static 'inspinia/js/plugins/pace/pace.min.js' %}"></script>
+
+<script src="{% static 'inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+
+{% block extra-js %}
+{% endblock %}
+
+</body>
+</html>
