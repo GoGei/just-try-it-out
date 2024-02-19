@@ -18,7 +18,7 @@ DATABASES['default']['PASSWORD'] = 'just_try_it_out'
 
 EMAIL_HOST_USER = 'user@example.com'
 DEFAULT_FROM_EMAIL = 'user@example.com'
-EMAIL_HOST_PASSWORD = 'password'
+EMAIL_HOST_PASSWORD = 'email-hash-secret'
 
 if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ['debug_toolbar']
