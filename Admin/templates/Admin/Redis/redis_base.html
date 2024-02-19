@@ -1,0 +1,12 @@
+{% extends 'Admin/admin_base.html' %}
+{% load static i18n hosts %}
+
+{% block menu-redis-active %} active {% endblock %}
+{% block menu-redis-active-open %} collapse in {% endblock %}
+
+{% block breadcrumb %}
+  {{ block.super }}
+  <li>
+    <a href="{% host_url 'admin-index' host 'admin' %}">{% trans 'Redis' %}</a>
+  </li>
+{% endblock %}

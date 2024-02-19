@@ -15,6 +15,9 @@
   <link href="{% static 'css/font-mfizz-2.4.1/font-mfizz.css' %}" rel="stylesheet">
 
   <link href="{% static 'inspinia/css/animate.css' %}" rel="stylesheet">
+  <link href="{% static 'inspinia/css/plugins/iCheck/custom.css' %}" rel="stylesheet">
+  <link href="{% static 'inspinia/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css' %}"
+        rel="stylesheet">
   <link href="{% static 'inspinia/css/style.css' %}" rel="stylesheet">
 
   {% block extra-css %}
@@ -51,6 +54,18 @@
             <span class="nav-label">{% trans 'Home' %}</span>
           </a>
         </li>
+        <li class="{% block menu-redis-active %}{% endblock %}">
+          <a href="#"><i class="icon-redis"></i> <span class="nav-label">{% trans 'Redis' %} </span><span
+              class="fa arrow"></span></a>
+          <ul class="nav nav-second-level {% block menu-redis-active-open %}{% endblock %}" style="">
+            <li class="{% block menu-redis-index-active %}{% endblock %}">
+              <a href="{% host_url 'admin-redis-index' host 'admin' %}">{% trans 'Index' %}</a>
+            </li>
+            <li class="{% block menu-redis-string-active %}{% endblock %}">
+              <a href="{% host_url 'admin-redis-string' host 'admin' %}">{% trans 'String' %}</a>
+            </li>
+          </ul>
+        </li>
       </ul>
     </div>
   </nav>
@@ -85,9 +100,6 @@
             <li>
               <a href="{% host_url 'admin-index' host 'admin' %}">{% trans 'Home' %}</a>
             </li>
-            <li class="active">
-              <a href="{% host_url 'admin-index' host 'admin' %}">{% trans 'Home' %}</a>
-            </li>
           {% endblock %}
         </ol>
       </div>
@@ -95,6 +107,7 @@
 
 
     <div class="wrapper wrapper-content animated fadeInRight">
+      {% include 'base_messages.html' %}
       {% block content %}
       {% endblock %}
     </div>
@@ -118,8 +131,11 @@
 <!-- Custom and plugin javascript -->
 <script src="{% static 'inspinia/js/inspinia.js' %}"></script>
 <script src="{% static 'inspinia/js/plugins/pace/pace.min.js' %}"></script>
-
 <script src="{% static 'inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+
+<script src="{% static 'inspinia/js/plugins/iCheck/icheck.min.js' %}"></script>
+
+<script src="{% static 'js/admin/admin.js' %}"></script>
 
 {% block extra-js %}
 {% endblock %}
