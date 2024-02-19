@@ -25,7 +25,11 @@ def redis_string(request):
 
     if body.is_valid():
         result = body.set()
-        messages.info(request, _(f'Set executed with result: {result}'))
+        msg = _(f'Set executed with result: {result}')
+        if result:
+            messages.info(request, msg)
+        else:
+            messages.warning(request, msg)
         return redirect(reverse('admin-redis-string', host='admin'))
 
     form = {

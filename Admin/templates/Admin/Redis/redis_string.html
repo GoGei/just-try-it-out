@@ -11,9 +11,6 @@
 {% endblock %}
 
 {% block content %}
-
-
-
   <div class="col-lg-12">
     <div class="ibox float-e-margins">
       <div class="ibox-title">
@@ -48,7 +45,6 @@
             <th>{% trans 'Value' %}</th>
             <th>{% trans 'EX' %}</th>
             <th>{% trans 'Approx EX in real time' %}</th>
-            <th>{% trans 'Actions' %}</th>
           </tr>
           </thead>
           <tbody>
@@ -59,11 +55,6 @@
               <td>{{ item.value }}</td>
               <td>{{ item.ttl|default_if_none:'' }}</td>
               <td class="countdown">{{ item.ttl|default_if_none:'' }}</td>
-              <td>
-                <button class="btn btn-danger btn-circle button-clear" type="submit">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
             </tr>
           {% endfor %}
           </tbody>
