@@ -4,5 +4,64 @@
 {% block menu-redis-index-active %} active {% endblock %}
 
 {% block content %}
-  <a href="https://redis.io/docs/" target="_blank">{% trans 'Docs' %}</a>
+  <div class="wrapper wrapper-content animated fadeInRight">
+    <div class="ibox-content m-b-sm border-bottom">
+      <div class="p-xs">
+        <div class="pull-left m-r-md">
+          <i class="icon-redis text-danger mid-icon"></i>
+        </div>
+        <h2>{% trans 'Redis' %}</h2>
+        <span>{% trans 'Just gaining experience with redis' %}</span>
+      </div>
+    </div>
+    <div class="ibox-content forum-container">
+      <div class="forum-title">
+        <h3>{% trans 'General' %}</h3>
+      </div>
+      <div class="forum-item active">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="forum-icon">
+              <i class="fa fa-book"></i>
+            </div>
+            <a href="https://redis.io/docs/" class="forum-item-title" target="_blank">{% trans 'Docs' %}</a>
+            <div class="forum-sub-title">
+              {% trans 'Documentation of redis' %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="forum-item">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="forum-icon">
+              <i class="fa fa-star"></i>
+            </div>
+            <a href="" class="forum-item-title">{% trans 'TODO' %}</a>
+            <div class="forum-sub-title">
+              {% trans 'String ranges' %}: <a href="https://redis.io/commands/substr/" target="_blank">SUBSTR</a>
+              , <a href="https://redis.io/commands/getrange/" target="_blank">GETRANGE</a>
+              , <a href="https://redis.io/commands/setrange/" target="_blank">SETRANGE</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="forum-title">
+        <h3>{% trans 'Other' %}</h3>
+      </div>
+      <div class="forum-item">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="forum-icon">
+              <i class="fa fa-pencil"></i>
+            </div>
+            <a href="{% host_url 'admin-redis-string-table' host 'admin' %}" class="forum-item-title">{% trans 'Strings' %}</a>
+            <div class="forum-sub-title">
+              {% trans 'Documentation to strings' %}: <a href="https://redis.io/docs/data-types/strings/" target="_blank">{% trans 'string docs' %}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'Admin/Redis/redis_base.html' %}
+{% load static i18n hosts %}
+
+{% block menu-redis-string-active %} active {% endblock %}
+
+{% block breadcrumb %}
+  {{ block.super }}
+  <li>
+    <a href="{% host_url 'admin-redis-string-table' host 'admin' %}">{% trans 'String' %}</a>
+  </li>
+{% endblock %}
+
+{% block content %}
+  <div class="tabs-container">
+    <ul class="nav nav-tabs">
+      <li class="{% block activity-tab-string-table %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-string-table' host 'admin' %}"> {% trans 'Table' %}</a>
+      </li>
+      <li class="{% block activity-tab-string-set %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-string-set' host 'admin' %}"> {% trans 'Set' %}</a>
+      </li>
+      <li class="{% block activity-tab-string-delete %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-string-delete' host 'admin' %}">{% trans 'Delete' %}</a>
+      </li>
+      <li class="{% block activity-tab-string-counter %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-string-counter' host 'admin' %}">{% trans 'Counter' %}</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane active">
+        <div class="panel-body">
+          {% block tab-content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra-js %}
+  <script>
+    $(document).ready(function () {
+      function updateCountdown() {
+        $(".countdown").each(function () {
+          let countText = $(this).text().trim();
+          let count = parseInt(countText);
+
+          if (countText === "" || isNaN(count)) {
+            return; // Skip this element
+          }
+
+          count--;
+
+          $(this).text(count);
+
+          if (count <= 0) {
+            clearInterval(countdownInterval);
+            $(this).text("");
+          }
+        });
+      }
+
+      let countdownInterval = setInterval(updateCountdown, 1000);
+    });
+  </script>
+{% endblock %}
