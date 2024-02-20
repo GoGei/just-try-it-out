@@ -1,13 +1,16 @@
 {% load i18n %}
 {% if buttons.save %}
-  <input type="submit" value="{% trans 'Save' %}" name="_save" class="btn btn-success form-save-button">
+  <input type="submit" value="{% trans 'Save' %}" name="_save" class="btn btn-success">
 {% endif %}
 {% if buttons.submit %}
-  <input type="submit" value="{% trans 'Submit' %}" name="_save" class="btn btn-success form-save-button">
+  <input type="submit" value="{% trans 'Submit' %}" name="_save" class="btn btn-success">
 {% endif %}
 {% if buttons.cancel %}
-  <input type="submit" value="{% trans 'Cancel' %}" name="_cancel" class="btn btn-primary form-cancel-button">
+  <input type="submit" value="{% trans 'Cancel' %}" name="_cancel" class="btn btn-primary">
 {% endif %}
 {% if buttons.refresh %}
-  <input type="submit" value="{% trans 'Refresh' %}" name="_refresh" class="btn btn-primary form-save-button">
+  <input type="submit" value="{% trans 'Refresh' %}" name="_refresh" class="btn btn-primary">
+{% endif %}
+{% if buttons.clear %}
+  <input type="submit" value="{% trans 'Clear' %}" name="_clear" class="btn btn-primary">
 {% endif %}
