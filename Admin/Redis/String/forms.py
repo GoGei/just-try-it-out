@@ -8,7 +8,8 @@ class BaseRedisForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
         self.service = RedisService()
-        self.base_key = RedisService.form_key(self.user, 'string')
+        self.redis_prefix = 'string'
+        self.base_key = RedisService.form_key(self.user, self.redis_prefix)
         super().__init__(*args, **kwargs)
 
     def clean_key(self):
@@ -66,7 +67,7 @@ class RedisStringSetForm(BaseRedisForm):
         keys = ('ex', 'nx', 'xx')
 
         with self.service as r:
-            key = RedisService.form_key(self.user, 'string', data.get('key'))
+            key = RedisService.form_key(self.user, self.redis_prefix, data.get('key'))
             extra = {
                 key: value
                 for key, value in data.items()
