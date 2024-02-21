@@ -1,0 +1,16 @@
+{% extends 'Admin/Redis/List/redis_list_base.html' %}
+{% load static i18n hosts %}
+
+{% block activity-tab-list-push %}active{% endblock %}
+
+{% block breadcrumb %}
+  {{ block.super }}
+  <li>
+    <a href="{% host_url 'admin-redis-list-push' host 'admin' %}">{% trans 'Push' %}</a>
+  </li>
+{% endblock %}
+
+{% block tab-content %}
+  {% include 'Admin/Redis/List/components/redis_list_form.html' %}
+  {% include 'Admin/Redis/List/components/redis_list_table.html' %}
+{% endblock %}

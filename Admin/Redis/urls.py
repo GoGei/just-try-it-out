@@ -4,4 +4,5 @@ from . import views
 urlpatterns = [
     url(r'$', views.redis_index, name='admin-redis-index'),
     url(r'string/', include('Admin.Redis.String.urls')),
+    url(r'list/', include('Admin.Redis.Lists.urls')),
 ]

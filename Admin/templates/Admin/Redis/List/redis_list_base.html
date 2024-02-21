@@ -1,0 +1,39 @@
+{% extends 'Admin/Redis/redis_base.html' %}
+{% load static i18n hosts %}
+
+{% block menu-redis-list-active %} active {% endblock %}
+
+{% block extra-libs-css %}
+  <link href="{% static 'inspinia/css/plugins/footable/footable.core.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block breadcrumb %}
+  {{ block.super }}
+  <li>
+    <a href="{% host_url 'admin-redis-list-table' host 'admin' %}">{% trans 'List' %}</a>
+  </li>
+{% endblock %}
+
+{% block content %}
+  <div class="tabs-container">
+    <ul class="nav nav-tabs">
+      <li class="{% block activity-tab-list-table %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-list-table' host 'admin' %}"> {% trans 'Table' %}</a>
+      </li>
+      <li class="{% block activity-tab-list-push %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-list-push' host 'admin' %}"> {% trans 'Push' %}</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane active">
+        <div class="panel-body">
+          {% block tab-content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra-libs-js %}
+  <script src="{% static 'inspinia/js/plugins/footable/footable.all.min.js' %}"></script>
+{% endblock %}
