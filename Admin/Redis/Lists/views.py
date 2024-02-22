@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.utils.translation import ugettext_lazy as _
 from core.Utils.Access.decorators import manager_required
 from .forms import (
-    RedisListTableForm, RedisListPushForm
+    RedisListTableForm, RedisListPushForm, RedisListTrimForm, RedisListSetRemForm, RedisListInsertForm
 )
 
 
@@ -70,3 +70,93 @@ def redis_list_push(request):
         }
     }
     return render(request, 'Admin/Redis/List/redis_list_push.html', context)
+
+
+@manager_required
+def redis_list_trim(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-list-trim', host='admin'))
+
+    body = RedisListTrimForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.trim()
+            msg = _(f'Trim executed with result: {result}')
+            if result:
+                messages.info(request, msg)
+            else:
+                messages.warning(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    data = RedisListTableForm(user=request.user).get()
+    context = {
+        'data': data,
+        'form': {
+            'body': body,
+            'title': _('List trim'),
+            'buttons': {'save': True, 'cancel': True}
+        }
+    }
+    return render(request, 'Admin/Redis/List/redis_list_trim.html', context)
+
+
+@manager_required
+def redis_list_set_rem(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-list-set-rem', host='admin'))
+
+    body = RedisListSetRemForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.execute()
+            msg = _(f'Set/Rem executed with result: {result}')
+            if result:
+                messages.info(request, msg)
+            else:
+                messages.warning(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    data = RedisListTableForm(user=request.user).get()
+    context = {
+        'data': data,
+        'form': {
+            'body': body,
+            'title': _('List set/rem'),
+            'buttons': {'save': True, 'cancel': True}
+        }
+    }
+    return render(request, 'Admin/Redis/List/redis_list_set_rem.html', context)
+
+
+@manager_required
+def redis_list_insert(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-list-insert', host='admin'))
+
+    body = RedisListInsertForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.insert()
+            msg = _(f'Insert executed with result: {result}')
+            if result:
+                messages.info(request, msg)
+            else:
+                messages.warning(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    data = RedisListTableForm(user=request.user).get()
+    context = {
+        'data': data,
+        'form': {
+            'body': body,
+            'title': _('List insert'),
+            'buttons': {'save': True, 'cancel': True}
+        }
+    }
+    return render(request, 'Admin/Redis/List/redis_list_insert.html', context)

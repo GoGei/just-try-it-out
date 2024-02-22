@@ -23,6 +23,15 @@
       <li class="{% block activity-tab-list-push %}{% endblock %}">
         <a href="{% host_url 'admin-redis-list-push' host 'admin' %}"> {% trans 'Push' %}</a>
       </li>
+      <li class="{% block activity-tab-list-trim %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-list-trim' host 'admin' %}"> {% trans 'Trim' %}</a>
+      </li>
+      <li class="{% block activity-tab-list-set-rem %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-list-set-rem' host 'admin' %}"> {% trans 'Set/Rem' %}</a>
+      </li>
+      <li class="{% block activity-tab-list-insert %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-list-insert' host 'admin' %}"> {% trans 'Insert' %}</a>
+      </li>
     </ul>
     <div class="tab-content">
       <div class="tab-pane active">
