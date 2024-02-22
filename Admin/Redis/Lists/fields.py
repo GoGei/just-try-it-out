@@ -12,6 +12,7 @@ class KeyField(forms.CharField):
 
 class ValuesField(forms.CharField):
     def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label', _('Values'))
         attrs = kwargs.pop('attrs', {})
         attrs.update({
             'class': 'form-control select2',

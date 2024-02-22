@@ -74,7 +74,7 @@ class RedisListPushForm(BaseRedisForm):
             ]
 
     key = fields.KeyField()
-    command = forms.ChoiceField(choices=Commands.choices, initial=Commands.LPUSH)
+    command = forms.ChoiceField(label=_('Command'), choices=Commands.choices, initial=Commands.LPUSH)
     values = fields.ValuesField()
 
     def push(self):
@@ -95,3 +95,79 @@ class RedisListPushForm(BaseRedisForm):
             }
             function = mapping.get(command)
             return function(key, *values)
+
+
+class RedisListTrimForm(BaseRedisForm):
+    key = fields.KeyField()
+    start = forms.IntegerField(label=_('Start'))
+    end = forms.IntegerField(label=_('End'))
+
+    def trim(self):
+        data = self.cleaned_data
+
+        with self.service as r:
+            key = RedisService.form_key(self.user, self.redis_prefix, data.get('key'))
+            return r.ltrim(key, data.get('start'), data.get('end'))
+
+
+class RedisListSetRemForm(BaseRedisForm):
+    class Commands(object):
+        SET = 'set', _('Set')
+        REM = 'rem', _('Rem')
+
+        @classmethod
+        def choices(cls):
+            return [
+                cls.SET,
+                cls.REM,
+            ]
+
+    key = fields.KeyField()
+    value = forms.CharField(label=_('Value'))
+    amount = forms.IntegerField(label=_('Specify index or count'))
+    command = forms.ChoiceField(label=_('Command'), choices=Commands.choices, initial=Commands.SET)
+
+    def execute(self):
+        data = self.cleaned_data
+
+        with self.service as r:
+            key = RedisService.form_key(self.user, self.redis_prefix, data.get('key'))
+            value = data.get('value')
+            command = data.get('command')
+            amount = data.get('amount')
+
+            commands = self.Commands
+            mapping = {
+                commands.SET[0]: r.lset,
+                commands.REM[0]: r.lrem,
+            }
+            function = mapping.get(command)
+            return function(key, amount, value)
+
+
+class RedisListInsertForm(BaseRedisForm):
+    class Commands(object):
+        BEFORE = 'before', _('Before')
+        AFTER = 'after', _('After')
+
+        @classmethod
+        def choices(cls):
+            return [
+                cls.BEFORE,
+                cls.AFTER,
+            ]
+
+    key = fields.KeyField()
+    where = forms.ChoiceField(label=_('Where'), choices=Commands.choices, initial=Commands.BEFORE)
+    pivot = forms.CharField(label=_('Pivot'), max_length=2048)
+    value = forms.CharField(label=_('Value'), max_length=2048)
+
+    def insert(self):
+        data = self.cleaned_data
+
+        with self.service as r:
+            key = RedisService.form_key(self.user, self.redis_prefix, data.get('key'))
+            where = data.get('where')
+            pivot = data.get('pivot')
+            value = data.get('value')
+            return r.linsert(key, where, pivot, value)

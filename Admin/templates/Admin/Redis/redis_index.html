@@ -43,7 +43,8 @@
               , <a href="https://redis.io/commands/getrange/" target="_blank">GETRANGE</a>
               , <a href="https://redis.io/commands/setrange/" target="_blank">SETRANGE</a>
               <br>
-              {% trans 'Lists' %}: <a href="https://redis.io/docs/data-types/lists/" target="_blank">LMOVE, LTRIM, Blocking commands, Capped lists, As queue, As stack, LINDEX, LINSERT, and LSET.</a>
+              {% trans 'Lists' %}: <a href="https://redis.io/docs/data-types/lists/" target="_blank">LMOVE, Blocking
+              commands, LINDEX.</a>
             </div>
           </div>
         </div>
@@ -57,9 +58,11 @@
             <div class="forum-icon">
               <i class="fa fa-pencil"></i>
             </div>
-            <a href="{% host_url 'admin-redis-string-table' host 'admin' %}" class="forum-item-title">{% trans 'Strings' %}</a>
+            <a href="{% host_url 'admin-redis-string-table' host 'admin' %}"
+               class="forum-item-title">{% trans 'Strings' %}</a>
             <div class="forum-sub-title">
-              {% trans 'Documentation to strings' %}: <a href="https://redis.io/docs/data-types/strings/" target="_blank">{% trans 'string docs' %}</a>
+              {% trans 'Documentation to strings' %}: <a href="https://redis.io/docs/data-types/strings/"
+                                                         target="_blank">{% trans 'string docs' %}</a>
             </div>
           </div>
         </div>
@@ -70,9 +73,11 @@
             <div class="forum-icon">
               <i class="fa fa-pencil"></i>
             </div>
-            <a href="{% host_url 'admin-redis-list-table' host 'admin' %}" class="forum-item-title">{% trans 'Lists' %}</a>
+            <a href="{% host_url 'admin-redis-list-table' host 'admin' %}"
+               class="forum-item-title">{% trans 'Lists' %}</a>
             <div class="forum-sub-title">
-              {% trans 'Documentation to strings' %}: <a href="https://redis.io/docs/data-types/lists/" target="_blank">{% trans 'lists docs' %}</a>
+              {% trans 'Documentation to strings' %}: <a href="https://redis.io/docs/data-types/lists/"
+                                                         target="_blank">{% trans 'lists docs' %}</a>
             </div>
           </div>
         </div>
