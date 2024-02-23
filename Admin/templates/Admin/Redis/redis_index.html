@@ -39,12 +39,12 @@
             </div>
             <a href="" class="forum-item-title">{% trans 'TODO' %}</a>
             <div class="forum-sub-title">
-              {% trans 'String ranges' %}: <a href="https://redis.io/commands/substr/" target="_blank">SUBSTR</a>
-              , <a href="https://redis.io/commands/getrange/" target="_blank">GETRANGE</a>
-              , <a href="https://redis.io/commands/setrange/" target="_blank">SETRANGE</a>
+              {% trans 'String commands' %}: <a href="https://redis.io/commands/?group=string" target="_blank">GETDEL,
+              GETRANGE, GETSET, SUBSTR</a>
               <br>
-              {% trans 'Lists' %}: <a href="https://redis.io/docs/data-types/lists/" target="_blank">LMOVE, Blocking
-              commands, LINDEX.</a>
+              {% trans 'Lists' %}: <a href="https://redis.io/docs/data-types/lists/" target="_blank">Blocking
+              commands</a>
+              <br>
             </div>
           </div>
         </div>
@@ -76,8 +76,8 @@
             <a href="{% host_url 'admin-redis-list-table' host 'admin' %}"
                class="forum-item-title">{% trans 'Lists' %}</a>
             <div class="forum-sub-title">
-              {% trans 'Documentation to strings' %}: <a href="https://redis.io/docs/data-types/lists/"
-                                                         target="_blank">{% trans 'lists docs' %}</a>
+              {% trans 'Documentation to lists' %}: <a href="https://redis.io/docs/data-types/lists/"
+                                                       target="_blank">{% trans 'lists docs' %}</a>
             </div>
           </div>
         </div>

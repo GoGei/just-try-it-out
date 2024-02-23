@@ -1,0 +1,8 @@
+{% load i18n %}
+
+<!-- By some reason they are not passed tu buttons -->
+{% for btn in buttons %}
+  <input type="submit" value="{{ btn.value|default:_("Custom") }}"
+         name="{{ btn.name|default:"_custom" }}"
+         class="btn {{ btn.class|default:'btn-primary' }}">
+{% endfor %}

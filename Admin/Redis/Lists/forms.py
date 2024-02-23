@@ -171,3 +171,117 @@ class RedisListInsertForm(BaseRedisForm):
             pivot = data.get('pivot')
             value = data.get('value')
             return r.linsert(key, where, pivot, value)
+
+
+class RedisListMoveForm(BaseRedisForm):
+    class Commands(object):
+        LEFT = 'left', _('Left')
+        RIGHT = 'right', _('Right')
+
+        @classmethod
+        def choices(cls):
+            return [
+                cls.LEFT,
+                cls.RIGHT,
+            ]
+
+    first_list = fields.KeyField(label=_('From'))
+    second_list = fields.KeyField(label=_('To'))
+    src = forms.ChoiceField(label=_('From first list'), choices=Commands.choices, initial=Commands.LEFT)
+    dest = forms.ChoiceField(label=_('To second list'), choices=Commands.choices, initial=Commands.RIGHT)
+
+    def move(self):
+        data = self.cleaned_data
+        with self.service as r:
+            return r.lmove(
+                first_list=RedisService.form_key(self.user, self.redis_prefix, data.get('first_list')),
+                second_list=RedisService.form_key(self.user, self.redis_prefix, data.get('second_list')),
+                src=data.get('src'),
+                dest=data.get('dest'),
+            )
+
+
+class RedisListStructureForm(BaseRedisForm):
+    class Commands(object):
+        LPUSH = 'lpush'
+        RPUSH = 'rpush'
+        LPOP = 'lpop'
+        RPOP = 'rpop'
+
+    PREFIX = '__'
+
+    key = fields.KeyField()
+    values = fields.ValuesField(required=False)
+    count = forms.IntegerField(min_value=1, initial=1, required=False)
+
+    @classmethod
+    def get_first_key_with_prefix(cls, dictionary, prefix: str = PREFIX):
+        for key in dictionary:
+            if key.startswith(prefix):
+                return key
+        return None
+
+    def execute(self, command: str):
+        data = self.cleaned_data
+        command = command.replace(self.PREFIX, '')
+        with self.service as r:
+            key = RedisService.form_key(self.user, self.redis_prefix, data.get('key'))
+            count = data.get('count', 1)
+            commands = self.Commands
+
+            if command == commands.LPUSH:
+                return r.lpush(key, *data.get('values', []))
+            if command == commands.RPUSH:
+                return r.rpush(key, *data.get('values', []))
+            if command == commands.LPOP:
+                return r.lpop(key, count)
+            if command == commands.RPOP:
+                return r.rpop(key, count)
+            return None
+
+
+class RedisListQueueForm(RedisListStructureForm):
+    CUSTOM_BUTTONS = [
+        {
+            'value': _('Push'),
+            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.LPUSH}',
+        },
+        {
+            'value': _('Pop'),
+            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.RPOP}',
+        },
+    ]
+
+
+class RedisListStackForm(RedisListStructureForm):
+    CUSTOM_BUTTONS = [
+        {
+            'value': _('Push'),
+            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.LPUSH}',
+        },
+        {
+            'value': _('Pop'),
+            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.LPOP}',
+        },
+    ]
+
+
+class RedisListDequeForm(RedisListStructureForm):
+    CUSTOM_BUTTONS = [
+        {
+            'value': _('Left push'),
+            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.LPUSH}',
+        },
+        {
+            'value': _('Left pop'),
+            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.LPOP}',
+        },
+        {
+            'value': _('Right push'),
+            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.RPUSH}',
+        },
+        {
+            'value': _('Right pop'),
+            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.RPOP}',
+        },
+    ]

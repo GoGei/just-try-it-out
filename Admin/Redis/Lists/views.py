@@ -4,8 +4,10 @@ from django.shortcuts import render, redirect
 from django.utils.translation import ugettext_lazy as _
 from core.Utils.Access.decorators import manager_required
 from .forms import (
-    RedisListTableForm, RedisListPushForm, RedisListTrimForm, RedisListSetRemForm, RedisListInsertForm
+    RedisListTableForm, RedisListPushForm, RedisListTrimForm, RedisListSetRemForm, RedisListInsertForm,
+    RedisListMoveForm, RedisListQueueForm, RedisListDequeForm, RedisListStackForm
 )
+from . import constants
 
 
 @manager_required
@@ -160,3 +162,75 @@ def redis_list_insert(request):
         }
     }
     return render(request, 'Admin/Redis/List/redis_list_insert.html', context)
+
+
+@manager_required
+def redis_list_move(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-list-move', host='admin'))
+
+    body = RedisListMoveForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.move()
+            msg = _(f'Move executed with result: {result}')
+            if result:
+                messages.info(request, msg)
+            else:
+                messages.warning(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    data = RedisListTableForm(user=request.user).get()
+    context = {
+        'data': data,
+        'form': {
+            'body': body,
+            'title': _('List move'),
+            'buttons': {'save': True, 'cancel': True}
+        }
+    }
+    return render(request, 'Admin/Redis/List/redis_list_move.html', context)
+
+
+@manager_required
+def redis_list_structures(request, structure: str):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-list-queue', host='admin'))
+
+    mapping = {
+        constants.QUEUE: RedisListQueueForm,
+        constants.DEQUE: RedisListDequeForm,
+        constants.STACK: RedisListStackForm,
+    }
+    form_class = mapping.get(structure)
+    body = form_class(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.execute(form_class.get_first_key_with_prefix(request.POST))
+            msg = _(f'Command executed with result: {result}')
+            if result:
+                messages.info(request, msg)
+            else:
+                messages.warning(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    data = RedisListTableForm(user=request.user).get()
+    context = {
+        'data': data,
+        'form': {
+            'body': body,
+            'title': _('Structure'),
+            'buttons': {'custom': form_class.CUSTOM_BUTTONS},
+        }
+    }
+
+    template_mapping = {
+        constants.QUEUE: 'Admin/Redis/List/structure/redis_list_queue.html',
+        constants.DEQUE: 'Admin/Redis/List/structure/redis_list_deque.html',
+        constants.STACK: 'Admin/Redis/List/structure/redis_list_stack.html',
+    }
+    return render(request, template_mapping.get(structure), context)
