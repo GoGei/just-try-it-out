@@ -43,7 +43,7 @@
               GETRANGE, GETSET, SUBSTR</a>
               <br>
               {% trans 'Lists' %}: <a href="https://redis.io/docs/data-types/lists/" target="_blank">Blocking
-              commands</a>
+              commands (BLMOVE, BLMPOP)</a>
               <br>
             </div>
           </div>
@@ -61,8 +61,8 @@
             <a href="{% host_url 'admin-redis-string-table' host 'admin' %}"
                class="forum-item-title">{% trans 'Strings' %}</a>
             <div class="forum-sub-title">
-              {% trans 'Documentation to strings' %}: <a href="https://redis.io/docs/data-types/strings/"
-                                                         target="_blank">{% trans 'string docs' %}</a>
+              {% trans 'String docs' %}: <a href="https://redis.io/docs/data-types/strings/"
+                                            target="_blank">{% trans 'string docs' %}</a>
             </div>
           </div>
         </div>
@@ -76,8 +76,8 @@
             <a href="{% host_url 'admin-redis-list-table' host 'admin' %}"
                class="forum-item-title">{% trans 'Lists' %}</a>
             <div class="forum-sub-title">
-              {% trans 'Documentation to lists' %}: <a href="https://redis.io/docs/data-types/lists/"
-                                                       target="_blank">{% trans 'lists docs' %}</a>
+              {% trans 'List docs' %}: <a href="https://redis.io/docs/data-types/lists/"
+                                          target="_blank">{% trans 'lists docs' %}</a>
             </div>
           </div>
         </div>
