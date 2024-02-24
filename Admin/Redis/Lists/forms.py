@@ -3,12 +3,31 @@ from django.utils.translation import ugettext_lazy as _
 from . import fields
 from ..service import RedisService
 
+PREFIX = 'list'
+
+
+def clean_key_from_base_key(base_key: str, key: str):
+    if not key:
+        return key
+    key = key.replace(base_key, '')
+    if len(key) >= 1:
+        key = key[1:]
+    return key
+
+
+def get_options(user, key: str = '*'):
+    base_key = RedisService.form_key(user, PREFIX)
+    with RedisService() as r:
+        key = f'{base_key}:{key}'
+        clean_keys = (clean_key_from_base_key(base_key, key) for key in r.keys(key))
+        return ((item, item) for item in clean_keys)
+
 
 class BaseRedisForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
         self.service = RedisService()
-        self.redis_prefix = 'list'
+        self.redis_prefix = PREFIX
         self.base_key = RedisService.form_key(self.user, self.redis_prefix)
         super().__init__(*args, **kwargs)
 
@@ -17,6 +36,9 @@ class BaseRedisForm(forms.Form):
         if search:
             search = search.strip()
         return search
+
+    def clean_key_from_base_key(self, key: str):
+        return clean_key_from_base_key(self.base_key, key)
 
     def get_data(self, key: str = '*'):
         key = f'{self.base_key}:{key}'
@@ -75,7 +97,7 @@ class RedisListPushForm(BaseRedisForm):
 
     key = fields.KeyField()
     command = forms.ChoiceField(label=_('Command'), choices=Commands.choices, initial=Commands.LPUSH)
-    values = fields.ValuesField()
+    values = fields.MultipleValuesField()
 
     def push(self):
         data = self.cleaned_data
@@ -190,15 +212,27 @@ class RedisListMoveForm(BaseRedisForm):
     src = forms.ChoiceField(label=_('From first list'), choices=Commands.choices, initial=Commands.LEFT)
     dest = forms.ChoiceField(label=_('To second list'), choices=Commands.choices, initial=Commands.RIGHT)
 
+    block = forms.BooleanField(label=_('Block command'), initial=False, required=False)
+    timeout = fields.TimeoutField(required=False)
+
+    def clean_timeout(self):
+        errors = fields.TimeoutField.clean_timeout(self.cleaned_data)
+        if errors:
+            [self.add_error('timeout', error) for error in errors]
+        return self.cleaned_data.get('timeout')
+
     def move(self):
         data = self.cleaned_data
         with self.service as r:
-            return r.lmove(
+            kwargs = dict(
                 first_list=RedisService.form_key(self.user, self.redis_prefix, data.get('first_list')),
                 second_list=RedisService.form_key(self.user, self.redis_prefix, data.get('second_list')),
                 src=data.get('src'),
                 dest=data.get('dest'),
             )
+            if data.get('block') is True:
+                return r.blmove(**kwargs, timeout=data.get('timeout'))
+            return r.lmove(**kwargs)
 
 
 class RedisListStructureForm(BaseRedisForm):
@@ -211,8 +245,8 @@ class RedisListStructureForm(BaseRedisForm):
     PREFIX = '__'
 
     key = fields.KeyField()
-    values = fields.ValuesField(required=False)
-    count = forms.IntegerField(min_value=1, initial=1, required=False)
+    values = fields.MultipleValuesField(required=False)
+    count = fields.CountField(required=False)
 
     @classmethod
     def get_first_key_with_prefix(cls, dictionary, prefix: str = PREFIX):
@@ -285,3 +319,103 @@ class RedisListDequeForm(RedisListStructureForm):
             'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.RPOP}',
         },
     ]
+
+
+class RedisListBlockPopForm(BaseRedisForm):
+    class Commands(object):
+        LPOP = 'lpop'
+        RPOP = 'rpop'
+
+    PREFIX = '__'
+
+    CUSTOM_BUTTONS = [
+        {
+            'value': _('Left pop'),
+            'name': f'{PREFIX}{Commands.LPOP}',
+        },
+        {
+            'value': _('Right pop'),
+            'name': f'{PREFIX}{Commands.RPOP}',
+        },
+    ]
+
+    keys = fields.MultipleValuesField(label=_('Keys'))
+    timeout = fields.TimeoutField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['keys'].widget.choices = get_options(self.user)
+
+    @classmethod
+    def get_first_key_with_prefix(cls, dictionary, prefix: str = PREFIX):
+        for key in dictionary:
+            if key.startswith(prefix):
+                return key
+        return None
+
+    def transform_key(self, key):
+        user = self.user
+        prefix = self.redis_prefix
+        return RedisService.form_key(user, prefix, key)
+
+    def clean_timeout(self):
+        errors = fields.TimeoutField.clean_timeout(self.cleaned_data, block=True)
+        if errors:
+            [self.add_error('timeout', error) for error in errors]
+        return self.cleaned_data.get('timeout')
+
+    def execute(self, command: str):
+        data = self.cleaned_data
+        command = command.replace(self.PREFIX, '')
+
+        keys = data.get('keys')
+        timeout = data.get('timeout')
+        commands = self.Commands
+        with self.service as r:
+            if command == commands.LPOP:
+                return r.blpop([self.transform_key(key) for key in keys], timeout)
+            if command == commands.RPOP:
+                return r.brpop([self.transform_key(key) for key in keys], timeout)
+            return None
+
+
+class RedisListBLMPopForm(BaseRedisForm):
+    class Commands(object):
+        LEFT = 'LEFT', _('Left')
+        RIGHT = 'RIGHT', _('Right')
+
+        @classmethod
+        def choices(cls):
+            return [
+                cls.LEFT,
+                cls.RIGHT,
+            ]
+
+    timeout = fields.TimeoutField(required=True)
+    # it has to be exact len as keys
+    # numkeys = forms.IntegerField(label=_('Number of keys to POP'), min_value=1)
+    keys = fields.MultipleValuesField(label=_('Keys'))
+    direction = forms.ChoiceField(label=_('Direction'), choices=Commands.choices, initial=Commands.LEFT)
+    count = fields.CountField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['keys'].widget.choices = get_options(self.user)
+
+    def clean_timeout(self):
+        errors = fields.TimeoutField.clean_timeout(self.cleaned_data, block=True)
+        if errors:
+            [self.add_error('timeout', error) for error in errors]
+        return self.cleaned_data.get('timeout')
+
+    def blmpop(self):
+        data = self.cleaned_data
+
+        timeout = data.get('timeout')
+        keys = data.get('keys')
+        numkeys = len(keys)
+        direction = data.get('direction')
+        count = data.get('count')
+
+        with self.service as r:
+            return r.blmpop(timeout, numkeys, *keys, direction=direction, count=count)

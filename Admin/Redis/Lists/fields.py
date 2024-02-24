@@ -10,10 +10,18 @@ class KeyField(forms.CharField):
         super().__init__(*args, **kwargs)
 
 
-class ValuesField(forms.CharField):
+class MultipleValuesField(forms.CharField):
+    EXAMPLE_OPTIONS = [
+        ('option1', 'option1'),
+        ('option2', 'option2'),
+        ('option3', 'option3'),
+    ]
+
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('label', _('Values'))
         attrs = kwargs.pop('attrs', {})
+        options = kwargs.pop('options', self.EXAMPLE_OPTIONS)
+
         attrs.update({
             'class': 'form-control select2',
             'data-select-2-config': {
@@ -25,7 +33,7 @@ class ValuesField(forms.CharField):
         })
 
         kwargs.setdefault('max_length', 1024)
-        kwargs.setdefault('widget', forms.SelectMultiple(attrs))
+        kwargs.setdefault('widget', forms.SelectMultiple(attrs, choices=options))
 
         super().__init__(*args, **kwargs)
 
@@ -40,3 +48,35 @@ class ValuesField(forms.CharField):
         """Validate that the input is a list or tuple."""
         if self.required and not value:
             raise ValidationError(self.error_messages['required'], code='required')
+
+
+class TimeoutField(forms.IntegerField):
+    REQUIRED_FOR_BLOCKING_COMMANDS_MSG = _('Timeout is required to blocking commands!')
+    TIMEOUT_LIMIT = 30
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label', _('Timeout'))
+        kwargs.setdefault('required', True)
+        kwargs.setdefault('min_value', 1)
+        kwargs.setdefault('max_value', self.TIMEOUT_LIMIT)
+        super().__init__(*args, **kwargs)
+
+    @classmethod
+    def clean_timeout(cls, cleaned_data, block: bool = True) -> list:
+        block = block if block in (True, False) else cleaned_data.get('block')
+        timeout = cleaned_data.get('timeout')
+
+        errors = []
+        if block and not timeout:
+            errors.append(cls.REQUIRED_FOR_BLOCKING_COMMANDS_MSG)
+
+        return errors
+
+
+class CountField(forms.IntegerField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label', _('Count'))
+        kwargs.setdefault('required', True)
+        kwargs.setdefault('min_value', 1)
+        kwargs.setdefault('initial', 1)
+        super().__init__(*args, **kwargs)

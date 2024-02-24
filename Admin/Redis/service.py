@@ -9,10 +9,12 @@ class RedisService(object):
             'host': settings.REDIS_HOST,
             'port': settings.REDIS_PORT,
             'db': settings.REDIS_DB,
+            'charset': 'utf-8',
+            'decode_responses': True,
         }
 
     def __enter__(self) -> Redis:
-        self.redis = Redis(**self.settings, charset="utf-8", decode_responses=True)
+        self.redis = Redis(**self.settings)
         return self.redis
 
     def __exit__(self, *args, **kwargs):

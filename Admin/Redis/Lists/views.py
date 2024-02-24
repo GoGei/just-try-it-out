@@ -5,7 +5,8 @@ from django.utils.translation import ugettext_lazy as _
 from core.Utils.Access.decorators import manager_required
 from .forms import (
     RedisListTableForm, RedisListPushForm, RedisListTrimForm, RedisListSetRemForm, RedisListInsertForm,
-    RedisListMoveForm, RedisListQueueForm, RedisListDequeForm, RedisListStackForm
+    RedisListMoveForm, RedisListQueueForm, RedisListDequeForm, RedisListStackForm, RedisListBlockPopForm,
+    RedisListBLMPopForm
 )
 from . import constants
 
@@ -197,7 +198,12 @@ def redis_list_move(request):
 @manager_required
 def redis_list_structures(request, structure: str):
     if '_cancel' in request.POST:
-        return redirect(reverse('admin-redis-list-queue', host='admin'))
+        mapping = {
+            constants.QUEUE: 'admin-redis-list-queue',
+            constants.DEQUE: 'admin-redis-list-deque',
+            constants.STACK: 'admin-redis-list-stack',
+        }
+        return redirect(reverse(mapping.get(structure), host='admin'))
 
     mapping = {
         constants.QUEUE: RedisListQueueForm,
@@ -234,3 +240,69 @@ def redis_list_structures(request, structure: str):
         constants.STACK: 'Admin/Redis/List/structure/redis_list_stack.html',
     }
     return render(request, template_mapping.get(structure), context)
+
+
+@manager_required
+def redis_list_bpop(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-list-bpop', host='admin'))
+
+    body = RedisListBlockPopForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.execute(body.get_first_key_with_prefix(request.POST))
+            if isinstance(result, tuple):
+                raw_key, value = result
+                key = body.clean_key_from_base_key(raw_key)
+                result = f'{key}={value}'
+            msg = _(f'Command executed with result: {result}')
+            if result:
+                messages.info(request, msg)
+            else:
+                messages.warning(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    data = RedisListTableForm(user=request.user).get()
+    context = {
+        'data': data,
+        'form': {
+            'body': body,
+            'title': _('Block pop'),
+            'buttons': {'cancel': True, 'custom': body.CUSTOM_BUTTONS},
+        }
+    }
+
+    return render(request, 'Admin/Redis/List/redis_list_bpop.html', context)
+
+
+@manager_required
+def redis_list_blmpop(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-list-blmpop', host='admin'))
+
+    body = RedisListBLMPopForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.blmpop()
+            msg = _(f'Command executed with result: {result}')
+            if result:
+                messages.info(request, msg)
+            else:
+                messages.warning(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    data = RedisListTableForm(user=request.user).get()
+    context = {
+        'data': data,
+        'form': {
+            'body': body,
+            'title': _('Block list multiple pop'),
+            'buttons': {'save': True, 'cancel': True},
+        }
+    }
+
+    return render(request, 'Admin/Redis/List/redis_list_blmpop.html', context)
