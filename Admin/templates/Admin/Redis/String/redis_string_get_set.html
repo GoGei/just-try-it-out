@@ -1,0 +1,16 @@
+{% extends 'Admin/Redis/String/redis_string_base.html' %}
+{% load static i18n hosts %}
+
+{% block activity-tab-string-get-set %}active{% endblock %}
+
+{% block breadcrumb %}
+  {{ block.super }}
+  <li>
+    <a href="{% host_url 'admin-redis-string-get-set' host 'admin' %}">{% trans 'GET-SET' %}</a>
+  </li>
+{% endblock %}
+
+{% block tab-content %}
+  {% include 'Admin/Redis/String/components/redis_string_form.html' %}
+  {% include 'Admin/Redis/String/components/redis_string_table.html' %}
+{% endblock %}
