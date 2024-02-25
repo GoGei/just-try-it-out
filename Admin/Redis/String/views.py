@@ -4,7 +4,8 @@ from django.shortcuts import render, redirect
 from django.utils.translation import ugettext_lazy as _
 from core.Utils.Access.decorators import manager_required
 from .forms import (
-    RedisStringSetForm, RedisStringTableForm, RedisStringDeleteForm, RedisStringCounterForm
+    RedisStringSetForm, RedisStringTableForm, RedisStringDeleteForm, RedisStringCounterForm, RedisStringGetDelForm,
+    RedisStringGetRangeForm, RedisStringGetSetForm, RedisStringLCSForm
 )
 
 
@@ -130,3 +131,123 @@ def redis_string_counter(request):
         }
     }
     return render(request, 'Admin/Redis/String/redis_string_counter.html', context)
+
+
+@manager_required
+def redis_string_get_del(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-string-get-del', host='admin'))
+
+    body = RedisStringGetDelForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.get_del()
+            msg = _(f'GET-DEL command executed with result: {result}')
+            if result:
+                messages.info(request, msg)
+            else:
+                messages.warning(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    data = RedisStringTableForm(user=request.user).get()
+    context = {
+        'data': data,
+        'form': {
+            'body': body,
+            'title': _('String GET before DEL'),
+            'buttons': {'save': True, 'cancel': True}
+        }
+    }
+    return render(request, 'Admin/Redis/String/redis_string_get_del.html', context)
+
+
+@manager_required
+def redis_string_get_range(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-string-get-range', host='admin'))
+
+    body = RedisStringGetRangeForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.get_range()
+            msg = _(f'Get range command executed with result: {result}')
+            if result:
+                messages.info(request, msg)
+            else:
+                messages.warning(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    data = RedisStringTableForm(user=request.user).get()
+    context = {
+        'data': data,
+        'form': {
+            'body': body,
+            'title': _('String get range'),
+            'buttons': {'save': True, 'cancel': True}
+        }
+    }
+    return render(request, 'Admin/Redis/String/redis_string_get_range.html', context)
+
+
+@manager_required
+def redis_string_get_set(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-string-get-set', host='admin'))
+
+    body = RedisStringGetSetForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.get_set()
+            msg = _(f'GET-SET command executed with result: {result}')
+            if result:
+                messages.info(request, msg)
+            else:
+                messages.warning(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    data = RedisStringTableForm(user=request.user).get()
+    context = {
+        'data': data,
+        'form': {
+            'body': body,
+            'title': _('String GET-SET'),
+            'buttons': {'save': True, 'cancel': True}
+        }
+    }
+    return render(request, 'Admin/Redis/String/redis_string_get_set.html', context)
+
+
+@manager_required
+def redis_string_lcs(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-string-lcs', host='admin'))
+
+    body = RedisStringLCSForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.lcs()
+            msg = _(f'Longest common substring command executed with result: {result}')
+            if result:
+                messages.info(request, msg)
+            else:
+                messages.warning(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    data = RedisStringTableForm(user=request.user).get()
+    context = {
+        'data': data,
+        'form': {
+            'body': body,
+            'title': _('Longest common substring'),
+            'buttons': {'save': True, 'cancel': True}
+        }
+    }
+    return render(request, 'Admin/Redis/String/redis_string_lcs.html', context)

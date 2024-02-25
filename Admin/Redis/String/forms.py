@@ -151,3 +151,59 @@ class RedisStringCounterForm(BaseRedisForm):
                     except Exception:
                         pass
             return None
+
+
+class RedisStringGetDelForm(BaseRedisForm):
+    key = fields.KeyField()
+
+    def get_del(self):
+        with self.service as r:
+            key = self.cleaned_data.get('key')
+            return r.getdel(f"{self.base_key}:{key}")
+
+
+class RedisStringGetRangeForm(BaseRedisForm):
+    key = fields.KeyField()
+    start = forms.IntegerField(label=_('Start'))
+    end = forms.IntegerField(label=_('End'))
+
+    def get_range(self):
+        data = self.cleaned_data
+        with self.service as r:
+            key = data.get('key')
+            key = f"{self.base_key}:{key}"
+            return r.getrange(key, data.get('start'), data.get('end'))
+
+
+class RedisStringGetSetForm(BaseRedisForm):
+    key = fields.KeyField()
+    value = fields.ValueField()
+
+    def get_set(self):
+        with self.service as r:
+            key = self.cleaned_data.get('key')
+            value = self.cleaned_data.get('value')
+            return r.getset(f"{self.base_key}:{key}", value)
+
+
+class RedisStringLCSForm(BaseRedisForm):
+    key1 = fields.KeyField(label=_('Key-1'))
+    key2 = fields.KeyField(label=_('Key-2'))
+
+    with_len = forms.BooleanField(label=_('With length'), required=False)
+    with_idx = forms.BooleanField(label=_('With index'), required=False)
+    minmatchlen = forms.IntegerField(label=_('With minimum match length'), min_value=1, required=False)
+    with_matchlen = forms.BooleanField(label=_('With matches length'), required=False)
+
+    def lcs(self):
+        data = self.cleaned_data
+        with self.service as r:
+            kwargs = {
+                'key1': f"{self.base_key}:{data.get('key1')}",
+                'key2': f"{self.base_key}:{data.get('key2')}",
+                'len': data.get('with_len', False),
+                'idx': data.get('with_idx', False),
+                'minmatchlen': data.get('minmatchlen') or 0,
+                'withmatchlen': data.get('with_matchlen', False),
+            }
+            return r.lcs(**kwargs)

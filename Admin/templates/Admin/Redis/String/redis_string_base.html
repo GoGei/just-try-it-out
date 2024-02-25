@@ -25,6 +25,18 @@
       <li class="{% block activity-tab-string-counter %}{% endblock %}">
         <a href="{% host_url 'admin-redis-string-counter' host 'admin' %}">{% trans 'Counter' %}</a>
       </li>
+      <li class="{% block activity-tab-string-get-del %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-string-get-del' host 'admin' %}">{% trans 'GET-DEL' %}</a>
+      </li>
+      <li class="{% block activity-tab-string-get-range %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-string-get-range' host 'admin' %}">{% trans 'GET range' %}</a>
+      </li>
+      <li class="{% block activity-tab-string-get-set %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-string-get-set' host 'admin' %}">{% trans 'GET-SET' %}</a>
+      </li>
+      <li class="{% block activity-tab-string-lcs %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-string-lcs' host 'admin' %}">{% trans 'LCS' %}</a>
+      </li>
     </ul>
     <div class="tab-content">
       <div class="tab-pane active">
