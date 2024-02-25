@@ -206,5 +206,4 @@ class RedisStringLCSForm(BaseRedisForm):
                 'minmatchlen': data.get('minmatchlen') or 0,
                 'withmatchlen': data.get('with_matchlen', False),
             }
-            print(kwargs)
             return r.lcs(**kwargs)
