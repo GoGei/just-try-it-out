@@ -40,6 +40,9 @@
             <a href="" class="forum-item-title">{% trans 'TODO' %}</a>
             <div class="forum-sub-title">
               {% trans 'Iterate over structures' %}: {% trans 'Do not use keys, use scans (like pagination)' %}
+              <br>
+              {% trans 'Sets' %}: SITERCARD, SISMEMGER, SMEMEBERS, SMISMEMBER, SMOVE, SPOP, SRANGEMEMBER, SREM, SUNION,
+              SUNIONSTORE
             </div>
           </div>
         </div>
@@ -78,6 +81,24 @@
                                           target="_blank">{% trans 'docs' %}</a>
               <br>
               {% trans 'Commands' %}: <a href="https://redis.io/commands/?group=list"
+                                         target="_blank">{% trans 'link' %}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="forum-item">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="forum-icon">
+              <i class="fa fa-pencil"></i>
+            </div>
+            <a href="{% host_url 'admin-redis-set-table' host 'admin' %}"
+               class="forum-item-title">{% trans 'Set' %}</a>
+            <div class="forum-sub-title">
+              {% trans 'Set docs' %}: <a href="https://redis.io/docs/data-types/sets/"
+                                         target="_blank">{% trans 'docs' %}</a>
+              <br>
+              {% trans 'Commands' %}: <a href="https://redis.io/commands/?group=set"
                                          target="_blank">{% trans 'link' %}</a>
             </div>
           </div>
