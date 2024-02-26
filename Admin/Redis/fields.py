@@ -10,6 +10,33 @@ class KeyField(forms.CharField):
         super().__init__(*args, **kwargs)
 
 
+class KeyWithOptionsField(KeyField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label', _('Key'))
+        attrs = kwargs.pop('attrs', {})
+        options = kwargs.pop('options', [])
+
+        attrs.update({
+            'class': 'form-control select2',
+            'data-select-2-config': {
+                'placeholder': _('Enter options'),
+                'tags': 'true',
+                'width': '100%',
+            }
+        })
+
+        kwargs.setdefault('max_length', 1024)
+        kwargs.setdefault('widget', forms.Select(attrs, choices=options))
+
+        super().__init__(*args, **kwargs)
+
+
+class ValueField(forms.CharField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label', _('Value'))
+        super().__init__(*args, **kwargs)
+
+
 class MultipleValuesField(forms.CharField):
     EXAMPLE_OPTIONS = [
         ('option1', 'option1'),
@@ -48,6 +75,28 @@ class MultipleValuesField(forms.CharField):
         """Validate that the input is a list or tuple."""
         if self.required and not value:
             raise ValidationError(self.error_messages['required'], code='required')
+
+
+class ExField(forms.IntegerField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label', _('[EX] Sets an expire flag on seconds.'))
+        kwargs.setdefault('min_value', 0)
+        kwargs.setdefault('required', False)
+        super().__init__(*args, **kwargs)
+
+
+class NxField(forms.BooleanField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label', _('[NX] Set the value only if it does not exist.'))
+        kwargs.setdefault('required', False)
+        super().__init__(*args, **kwargs)
+
+
+class XxField(forms.BooleanField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label', _('[XX] Set the value only if it already exists.'))
+        kwargs.setdefault('required', False)
+        super().__init__(*args, **kwargs)
 
 
 class TimeoutField(forms.IntegerField):

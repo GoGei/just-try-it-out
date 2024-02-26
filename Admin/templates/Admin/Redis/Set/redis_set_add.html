@@ -1,0 +1,16 @@
+{% extends 'Admin/Redis/Set/redis_set_base.html' %}
+{% load static i18n hosts %}
+
+{% block activity-tab-set-add %}active{% endblock %}
+
+{% block breadcrumb %}
+  {{ block.super }}
+  <li>
+    <a href="{% host_url 'admin-redis-set-add' host 'admin' %}">{% trans 'Add' %}</a>
+  </li>
+{% endblock %}
+
+{% block tab-content %}
+  {% include 'Admin/Redis/Set/components/redis_set_form.html' %}
+  {% include 'Admin/Redis/Set/components/redis_set_items.html' %}
+{% endblock %}

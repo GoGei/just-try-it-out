@@ -71,6 +71,9 @@
             <li class="{% block menu-redis-list-active %}{% endblock %}">
               <a href="{% host_url 'admin-redis-list-table' host 'admin' %}">{% trans 'List' %}</a>
             </li>
+            <li class="{% block menu-redis-set-active %}{% endblock %}">
+              <a href="{% host_url 'admin-redis-set-table' host 'admin' %}">{% trans 'Set' %}</a>
+            </li>
           </ul>
         </li>
       </ul>

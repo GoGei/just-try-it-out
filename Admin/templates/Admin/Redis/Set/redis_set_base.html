@@ -1,0 +1,40 @@
+{% extends 'Admin/Redis/redis_base.html' %}
+{% load static i18n hosts %}
+
+{% block menu-redis-set-active %} active {% endblock %}
+
+{% block breadcrumb %}
+  {{ block.super }}
+  <li>
+    <a href="{% host_url 'admin-redis-set-table' host 'admin' %}">{% trans 'Set' %}</a>
+  </li>
+{% endblock %}
+
+{% block content %}
+  <div class="tabs-container">
+    <ul class="nav nav-tabs">
+      <li class="{% block activity-tab-set-table %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-table' host 'admin' %}"> {% trans 'Table' %}</a>
+      </li>
+      <li class="{% block activity-tab-set-add %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-add' host 'admin' %}"> {% trans 'Add' %}</a>
+      </li>
+      <li class="{% block activity-tab-set-cardinality %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-cardinality' host 'admin' %}"> {% trans 'Card' %}</a>
+      </li>
+      <li class="{% block activity-tab-set-difference %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-difference' host 'admin' %}"> {% trans 'Diff' %}</a>
+      </li>
+      <li class="{% block activity-tab-set-intersect %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-intersect' host 'admin' %}"> {% trans 'Inter' %}</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane active">
+        <div class="panel-body">
+          {% block tab-content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
