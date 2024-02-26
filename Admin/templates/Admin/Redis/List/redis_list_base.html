@@ -7,6 +7,18 @@
   <link href="{% static 'inspinia/css/plugins/footable/footable.core.css' %}" rel="stylesheet">
 {% endblock %}
 
+{% block extra-css %}
+  <style>
+    .footable-details-show {
+      display: block;
+    }
+
+    .footable-details-hide {
+      display: none;
+    }
+  </style>
+{% endblock %}
+
 {% block breadcrumb %}
   {{ block.super }}
   <li>
@@ -63,4 +75,32 @@
 
 {% block extra-libs-js %}
   <script src="{% static 'inspinia/js/plugins/footable/footable.all.min.js' %}"></script>
+{% endblock %}
+
+{% block extra-js %}
+  <script>
+    $(document).ready(function () {
+      $('.footable').footable();
+    });
+
+    $('.footable-row').click(function (e) {
+      e.preventDefault();
+      let containerID = $(this).data('details-row-id');
+      console.log(containerID);
+      
+      let $detailsContainer = $(`#${containerID}`);
+      let classShow = 'footable-details-show';
+      
+      let classHide = 'footable-details-hide';
+      console.log($detailsContainer);
+      
+      if ($detailsContainer.hasClass(classShow)) {
+        $detailsContainer.removeClass(classShow).addClass(classHide);
+      }
+      else if ($detailsContainer.hasClass(classHide)) {
+        $detailsContainer.removeClass(classHide).addClass(classShow);
+      }
+
+    })
+  </script>
 {% endblock %}

@@ -15,28 +15,31 @@
              data-page-size="8">
         <thead>
         <tr>
-          <th class="footable-visible">#</th>
           <th class="footable-visible">{% trans 'Name' %}</th>
-          <th class="footable-visible">{% trans 'Length' %}</th>
-          <th class="footable-visible">{% trans 'Values' %}</th>
-{#          <th data-hide="all" class="" style="display: none;">{% trans 'Values' %}</th>#}
+          <th class="footable-visible" style="width: 10%">{% trans 'Length' %}</th>
         </tr>
         </thead>
         <tbody>
         {% for item in data %}
-          <tr class="{% if forloop.counter0|divisibleby:"2" %}footable-odd{% else %}footable-even{% endif %}"
-              style="display: table-row;">
-            <td class="footable-visible footable-first-column">{{ forloop.counter }}</td>
-            <td class="footable-visible"><span class="footable-toggle"></span>{{ item.key }}
+          <tr class="footable-row {% if forloop.counter0|divisibleby:"2" %}footable-odd{% else %}footable-even{% endif %}"
+              style="display: table-row;" data-details-row-id="footable-details-{{ forloop.counter0 }}">
+            <td class="footable-visible">
+              {{ item.key }}
             </td>
-            <td class="footable-visible">{{ item.len }}</td>
-            <td class="footable-visible">{{ item.values|join:' -> ' }}</td>
-{#            <td style="display: none;">{{ item.values|join:' -> ' }}</td>#}
+            <td class="footable-visible" style="width: 10%">{{ item.len }}</td>
+          </tr>
+          <tr class="footable-row-detail footable-details-hide" id="footable-details-{{ forloop.counter0 }}">
+            <td class="footable-row-detail-cell" colspan="4">
+              <div class="footable-row-detail-inner">
+                <div class="footable-row-detail-row">
+                  <div class="footable-row-detail-value">{{ item.values|join:' -> ' }}</div>
+                </div>
+              </div>
+            </td>
           </tr>
         {% endfor %}
         </tbody>
       </table>
-
     </div>
   </div>
 {% endif %}
