@@ -158,10 +158,164 @@ class RedisSetInterForm(BaseRedisForm):
 
 
 class RedisSetMembersForm(BaseRedisForm):
-    key = fields.KeyField()
+    key = fields.KeyWithOptionsField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['key'].widget.choices = get_options(self.user)
 
     def members(self):
         data = self.cleaned_data
         key = self.form_key(data.get('key'))
         with self.service as r:
             return r.smembers(key)
+
+
+class RedisSetInterCardForm(BaseRedisForm):
+    keys = fields.MultipleValuesField(label=_('Keys'))
+    limit = forms.IntegerField(min_value=1, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['keys'].widget.choices = get_options(self.user)
+
+    def intersect_cardinality(self):
+        data = self.cleaned_data
+
+        keys = data.get('keys')
+        limit = data.get('limit') or 0
+
+        with self.service as r:
+            keys = [self.form_key(key) for key in keys]
+            return r.sintercard(len(keys), keys, limit)
+
+    def get_keys_on_work(self) -> list:
+        data = self.cleaned_data
+        keys = data.get('keys')
+        return keys
+
+
+class RedisSetIsMemberForm(BaseRedisForm):
+    key = fields.KeyWithOptionsField()
+    members = fields.MultipleValuesField(label=_('Members'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['key'].widget.choices = get_options(self.user)
+
+    def ismember(self):
+        data = self.cleaned_data
+
+        key = data.get('key')
+        members = data.get('members')
+
+        with self.service as r:
+            return r.smismember(self.form_key(key), members)
+
+
+class RedisSetMoveForm(BaseRedisForm):
+    source = fields.KeyWithOptionsField(label=_('Source'))
+    destination = fields.KeyWithOptionsField(label=_('Destination'))
+    member = fields.ValueField(label=_('Member'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['source'].widget.choices = get_options(self.user)
+        self.fields['destination'].widget.choices = get_options(self.user)
+
+    def move(self):
+        data = self.cleaned_data
+
+        source = self.form_key(data.get('source'))
+        destination = self.form_key(data.get('destination'))
+        member = data.get('member')
+
+        with self.service as r:
+            return r.smove(source, destination, member)
+
+    def get_keys_on_work(self) -> list:
+        data = self.cleaned_data
+        source = data.get('source')
+        destination = data.get('destination')
+        return [source, destination]
+
+
+class RedisSetPopForm(BaseRedisForm):
+    key = fields.KeyWithOptionsField()
+    count = fields.CountField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['key'].widget.choices = get_options(self.user)
+
+    def pop(self):
+        data = self.cleaned_data
+
+        key = self.form_key(data.get('key'))
+        count = data.get('count')
+
+        with self.service as r:
+            return r.spop(key, count)
+
+
+class RedisSetRandMemberForm(BaseRedisForm):
+    key = fields.KeyWithOptionsField()
+    count = fields.CountField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['key'].widget.choices = get_options(self.user)
+
+    def rand_member(self):
+        data = self.cleaned_data
+
+        key = self.form_key(data.get('key'))
+        count = data.get('count')
+
+        with self.service as r:
+            return r.srandmember(key, count)
+
+
+class RedisSetRemoveForm(BaseRedisForm):
+    key = fields.KeyWithOptionsField()
+    values = fields.MultipleValuesField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['key'].widget.choices = get_options(self.user)
+
+    def remove(self):
+        data = self.cleaned_data
+
+        key = self.form_key(data.get('key'))
+        values = data.get('values')
+
+        with self.service as r:
+            return r.srem(key, *values)
+
+
+class RedisSetUnionForm(BaseRedisForm):
+    keys = fields.MultipleValuesField(label=_('Keys'))
+    destination = fields.KeyField(label=_('Destination [Set to save result]'), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['keys'].widget.choices = get_options(self.user)
+
+    def get_keys_on_work(self) -> list:
+        data = self.cleaned_data
+        destination = [data.get('destination')] or []
+        keys = data.get('keys')
+        return keys + destination
+
+    def union(self):
+        data = self.cleaned_data
+
+        destination = data.get('destination')
+        keys = [self.form_key(key) for key in data.get('keys')]
+
+        with self.service as r:
+            if destination:
+                destination = self.form_key(destination)
+                return r.sunionstore(destination, keys)
+            return r.sunion(keys)

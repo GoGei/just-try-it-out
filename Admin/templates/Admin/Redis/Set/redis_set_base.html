@@ -31,6 +31,27 @@
       <li class="{% block activity-tab-set-intersect %}{% endblock %}">
         <a href="{% host_url 'admin-redis-set-intersect' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Inter' %}</a>
       </li>
+      <li class="{% block activity-tab-set-intersect-cardinality %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-intersect-cardinality' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Inter with card' %}</a>
+      </li>
+      <li class="{% block activity-tab-set-is-member %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-is-member' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Is member' %}</a>
+      </li>
+      <li class="{% block activity-tab-set-move %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-move' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Move' %}</a>
+      </li>
+      <li class="{% block activity-tab-set-pop %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-pop' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Pop' %}</a>
+      </li>
+      <li class="{% block activity-tab-set-rand-member %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-rand-member' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Rand member' %}</a>
+      </li>
+      <li class="{% block activity-tab-set-remove %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-remove' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Remove' %}</a>
+      </li>
+      <li class="{% block activity-tab-set-union %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-set-union' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Union' %}</a>
+      </li>
     </ul>
     <div class="tab-content">
       <div class="tab-pane active">
