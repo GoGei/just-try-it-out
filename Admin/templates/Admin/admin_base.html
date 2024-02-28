@@ -74,6 +74,9 @@
             <li class="{% block menu-redis-set-active %}{% endblock %}">
               <a href="{% host_url 'admin-redis-set-table' host 'admin' scheme SITE_SCHEME %}">{% trans 'Set' %}</a>
             </li>
+            <li class="{% block menu-redis-hash-active %}{% endblock %}">
+              <a href="{% host_url 'admin-redis-hash-table' host 'admin' scheme SITE_SCHEME %}">{% trans 'Hashes' %}</a>
+            </li>
           </ul>
         </li>
       </ul>

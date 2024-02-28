@@ -1,52 +1,12 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from .. import fields
-from ..service import RedisService
+from .. import fields, forms as redis_forms
 
 PREFIX = 'set'
 
 
-def clean_key_from_base_key(base_key: str, key: str):
-    if not key:
-        return key
-    key = key.replace(base_key, '')
-    if len(key) >= 1:
-        key = key[1:]
-    return key
-
-
-def get_options(user, key: str = '*'):
-    base_key = RedisService.form_key(user, PREFIX)
-    with RedisService() as r:
-        key = f'{base_key}:{key}'
-        clean_keys = (clean_key_from_base_key(base_key, key) for key in r.keys(key))
-        return ((item, item) for item in clean_keys)
-
-
-class BaseRedisForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user')
-        self.service = RedisService()
-        self.redis_prefix = PREFIX
-        self.base_key = RedisService.form_key(self.user, self.redis_prefix)
-        super().__init__(*args, **kwargs)
-
-    def clean_key(self):
-        key = self.cleaned_data.get('key')
-        if key:
-            key = key.strip()
-        return key
-
-    def form_key(self, key: str) -> str:
-        return RedisService.form_key(self.user, self.redis_prefix, key)
-
-    def get_data(self, key: str = '*'):
-        key = f'{self.base_key}:{key}'
-        base_key = f'{self.base_key}:'
-
-        with self.service as r:
-            keys = r.keys(key)
-            return list({'key': key.replace(base_key, '')} for key in keys)
+class BaseRedisForm(redis_forms.BaseRedisForm):
+    REDIS_PREFIX = PREFIX
 
     def get_sets_on_work(self):
         keys = self.get_keys_on_work()
@@ -59,30 +19,8 @@ class BaseRedisForm(forms.Form):
         return [self.cleaned_data.get('key')]
 
 
-class RedisSetTableForm(BaseRedisForm):
-    search = forms.CharField(label=_('Term to search'), required=False)
-
-    def clean_search(self):
-        search = self.cleaned_data.get('search')
-        if search:
-            search = search.strip()
-        return search
-
-    def apply_search(self):
-        search = self.cleaned_data.get('search')
-        return self.get_data(search)
-
-    def clear(self):
-        search = self.cleaned_data.get('search')
-        with self.service as r:
-            if search:
-                names = tuple(map(lambda x: f'{self.base_key}:{x.strip()}', search.split()))
-            else:
-                names = r.keys(f'{self.base_key}:*')
-            return r.delete(*names)
-
-    def get(self):
-        return self.get_data()
+class RedisSetTableForm(BaseRedisForm, redis_forms.BaseRedisSearchForm):
+    pass
 
 
 class RedisSetAddForm(BaseRedisForm):
@@ -96,7 +34,11 @@ class RedisSetAddForm(BaseRedisForm):
 
 
 class RedisSetCardForm(BaseRedisForm):
-    key = fields.KeyField()
+    key = fields.KeyWithOptionsField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_options('key')
 
     def cardinality(self):
         data = self.cleaned_data
@@ -111,8 +53,8 @@ class RedisSetDiffForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['main_key'].widget.choices = get_options(self.user)
-        self.fields['keys'].widget.choices = get_options(self.user)
+        self.set_options('main_key')
+        self.set_options('keys')
 
     def difference(self):
         data = self.cleaned_data
@@ -138,7 +80,7 @@ class RedisSetInterForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['keys'].widget.choices = get_options(self.user)
+        self.set_options('keys')
 
     def intersect(self):
         data = self.cleaned_data
@@ -162,7 +104,7 @@ class RedisSetMembersForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['key'].widget.choices = get_options(self.user)
+        self.set_options('key')
 
     def members(self):
         data = self.cleaned_data
@@ -177,7 +119,7 @@ class RedisSetInterCardForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['keys'].widget.choices = get_options(self.user)
+        self.set_options('keys')
 
     def intersect_cardinality(self):
         data = self.cleaned_data
@@ -201,7 +143,7 @@ class RedisSetIsMemberForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['key'].widget.choices = get_options(self.user)
+        self.set_options('key')
 
     def ismember(self):
         data = self.cleaned_data
@@ -220,8 +162,8 @@ class RedisSetMoveForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['source'].widget.choices = get_options(self.user)
-        self.fields['destination'].widget.choices = get_options(self.user)
+        self.set_options('source')
+        self.set_options('destination')
 
     def move(self):
         data = self.cleaned_data
@@ -246,7 +188,7 @@ class RedisSetPopForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['key'].widget.choices = get_options(self.user)
+        self.set_options('key')
 
     def pop(self):
         data = self.cleaned_data
@@ -264,7 +206,7 @@ class RedisSetRandMemberForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['key'].widget.choices = get_options(self.user)
+        self.set_options('key')
 
     def rand_member(self):
         data = self.cleaned_data
@@ -282,7 +224,7 @@ class RedisSetRemoveForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['key'].widget.choices = get_options(self.user)
+        self.set_options('key')
 
     def remove(self):
         data = self.cleaned_data
@@ -300,7 +242,7 @@ class RedisSetUnionForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['keys'].widget.choices = get_options(self.user)
+        self.set_options('keys')
 
     def get_keys_on_work(self) -> list:
         data = self.cleaned_data

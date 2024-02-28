@@ -101,6 +101,24 @@
           </div>
         </div>
       </div>
+      <div class="forum-item">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="forum-icon">
+              <i class="fa fa-pencil"></i>
+            </div>
+            <a href="{% host_url 'admin-redis-hash-table' host 'admin' scheme SITE_SCHEME %}"
+               class="forum-item-title">{% trans 'Hashes' %}</a>
+            <div class="forum-sub-title">
+              {% trans 'Hashes docs' %}: <a href="https://redis.io/docs/data-types/hashes/"
+                                            target="_blank">{% trans 'docs' %}</a>
+              <br>
+              {% trans 'Commands' %}: <a href="https://redis.io/commands/?group=hash"
+                                         target="_blank">{% trans 'link' %}</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}

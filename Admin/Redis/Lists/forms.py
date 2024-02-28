@@ -1,44 +1,12 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from .. import fields
-from ..service import RedisService
+from .. import fields, forms as redis_forms
 
 PREFIX = 'list'
 
 
-def clean_key_from_base_key(base_key: str, key: str):
-    if not key:
-        return key
-    key = key.replace(base_key, '')
-    if len(key) >= 1:
-        key = key[1:]
-    return key
-
-
-def get_options(user, key: str = '*'):
-    base_key = RedisService.form_key(user, PREFIX)
-    with RedisService() as r:
-        key = f'{base_key}:{key}'
-        clean_keys = (clean_key_from_base_key(base_key, key) for key in r.keys(key))
-        return ((item, item) for item in clean_keys)
-
-
-class BaseRedisForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user')
-        self.service = RedisService()
-        self.redis_prefix = PREFIX
-        self.base_key = RedisService.form_key(self.user, self.redis_prefix)
-        super().__init__(*args, **kwargs)
-
-    def clean_key(self):
-        search = self.cleaned_data.get('key')
-        if search:
-            search = search.strip()
-        return search
-
-    def clean_key_from_base_key(self, key: str):
-        return clean_key_from_base_key(self.base_key, key)
+class BaseRedisForm(redis_forms.BaseRedisForm):
+    REDIS_PREFIX = PREFIX
 
     def get_data(self, key: str = '*'):
         key = f'{self.base_key}:{key}'
@@ -51,31 +19,9 @@ class BaseRedisForm(forms.Form):
                          'len': r.llen(key),
                          } for key in keys)
 
-    def get(self):
-        return self.get_data()
 
-
-class RedisListTableForm(BaseRedisForm):
-    search = forms.CharField(label=_('Term to search'), required=False)
-
-    def clean_search(self):
-        search = self.cleaned_data.get('search')
-        if search:
-            search = search.strip()
-        return search
-
-    def apply_search(self):
-        search = self.cleaned_data.get('search')
-        return self.get_data(search)
-
-    def clear(self):
-        search = self.cleaned_data.get('search')
-        with self.service as r:
-            if search:
-                names = tuple(map(lambda x: f'{self.base_key}:{x.strip()}', search.split()))
-            else:
-                names = r.keys(f'{self.base_key}:*')
-            return r.delete(*names)
+class RedisListTableForm(BaseRedisForm, redis_forms.BaseRedisSearchForm):
+    pass
 
 
 class RedisListPushForm(BaseRedisForm):
@@ -103,7 +49,7 @@ class RedisListPushForm(BaseRedisForm):
         data = self.cleaned_data
 
         with self.service as r:
-            key = RedisService.form_key(self.user, self.redis_prefix, data.get('key'))
+            key = self.form_key(data.get('key'))
             values = data.get('values')
             command = data.get('command')
 
@@ -128,7 +74,7 @@ class RedisListTrimForm(BaseRedisForm):
         data = self.cleaned_data
 
         with self.service as r:
-            key = RedisService.form_key(self.user, self.redis_prefix, data.get('key'))
+            key = self.form_key(data.get('key'))
             return r.ltrim(key, data.get('start'), data.get('end'))
 
 
@@ -153,7 +99,7 @@ class RedisListSetRemForm(BaseRedisForm):
         data = self.cleaned_data
 
         with self.service as r:
-            key = RedisService.form_key(self.user, self.redis_prefix, data.get('key'))
+            key = self.form_key(data.get('key'))
             value = data.get('value')
             command = data.get('command')
             amount = data.get('amount')
@@ -179,16 +125,20 @@ class RedisListInsertForm(BaseRedisForm):
                 cls.AFTER,
             ]
 
-    key = fields.KeyField()
+    key = fields.KeyWithOptionsField()
     where = forms.ChoiceField(label=_('Where'), choices=Commands.choices, initial=Commands.BEFORE)
     pivot = forms.CharField(label=_('Pivot'), max_length=2048)
     value = forms.CharField(label=_('Value'), max_length=2048)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_options('key')
 
     def insert(self):
         data = self.cleaned_data
 
         with self.service as r:
-            key = RedisService.form_key(self.user, self.redis_prefix, data.get('key'))
+            key = self.form_key(data.get('key'))
             where = data.get('where')
             pivot = data.get('pivot')
             value = data.get('value')
@@ -207,13 +157,18 @@ class RedisListMoveForm(BaseRedisForm):
                 cls.RIGHT,
             ]
 
-    first_list = fields.KeyField(label=_('From'))
-    second_list = fields.KeyField(label=_('To'))
+    first_list = fields.KeyWithOptionsField(label=_('From'))
+    second_list = fields.KeyWithOptionsField(label=_('To'))
     src = forms.ChoiceField(label=_('From first list'), choices=Commands.choices, initial=Commands.LEFT)
     dest = forms.ChoiceField(label=_('To second list'), choices=Commands.choices, initial=Commands.RIGHT)
 
     block = forms.BooleanField(label=_('Block command'), initial=False, required=False)
     timeout = fields.TimeoutField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_options('first_list')
+        self.set_options('second_list')
 
     def clean_timeout(self):
         errors = fields.TimeoutField.clean_timeout(self.cleaned_data)
@@ -225,8 +180,8 @@ class RedisListMoveForm(BaseRedisForm):
         data = self.cleaned_data
         with self.service as r:
             kwargs = dict(
-                first_list=RedisService.form_key(self.user, self.redis_prefix, data.get('first_list')),
-                second_list=RedisService.form_key(self.user, self.redis_prefix, data.get('second_list')),
+                first_list=self.form_key(data.get('first_list')),
+                second_list=self.form_key(data.get('second_list')),
                 src=data.get('src'),
                 dest=data.get('dest'),
             )
@@ -242,14 +197,14 @@ class RedisListStructureForm(BaseRedisForm):
         LPOP = 'lpop'
         RPOP = 'rpop'
 
-    PREFIX = '__'
+    BUTTON_PREFIX = '__'
 
     key = fields.KeyField()
     values = fields.MultipleValuesField(required=False)
     count = fields.CountField(required=False)
 
     @classmethod
-    def get_first_key_with_prefix(cls, dictionary, prefix: str = PREFIX):
+    def get_first_key_with_prefix(cls, dictionary, prefix: str = BUTTON_PREFIX):
         for key in dictionary:
             if key.startswith(prefix):
                 return key
@@ -257,9 +212,9 @@ class RedisListStructureForm(BaseRedisForm):
 
     def execute(self, command: str):
         data = self.cleaned_data
-        command = command.replace(self.PREFIX, '')
+        command = command.replace(self.BUTTON_PREFIX, '')
         with self.service as r:
-            key = RedisService.form_key(self.user, self.redis_prefix, data.get('key'))
+            key = self.form_key(data.get('key'))
             count = data.get('count', 1)
             commands = self.Commands
 
@@ -278,11 +233,11 @@ class RedisListQueueForm(RedisListStructureForm):
     CUSTOM_BUTTONS = [
         {
             'value': _('Push'),
-            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.LPUSH}',
+            'name': f'{RedisListStructureForm.BUTTON_PREFIX}{RedisListStructureForm.Commands.LPUSH}',
         },
         {
             'value': _('Pop'),
-            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.RPOP}',
+            'name': f'{RedisListStructureForm.BUTTON_PREFIX}{RedisListStructureForm.Commands.RPOP}',
         },
     ]
 
@@ -291,11 +246,11 @@ class RedisListStackForm(RedisListStructureForm):
     CUSTOM_BUTTONS = [
         {
             'value': _('Push'),
-            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.LPUSH}',
+            'name': f'{RedisListStructureForm.BUTTON_PREFIX}{RedisListStructureForm.Commands.LPUSH}',
         },
         {
             'value': _('Pop'),
-            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.LPOP}',
+            'name': f'{RedisListStructureForm.BUTTON_PREFIX}{RedisListStructureForm.Commands.LPOP}',
         },
     ]
 
@@ -304,19 +259,19 @@ class RedisListDequeForm(RedisListStructureForm):
     CUSTOM_BUTTONS = [
         {
             'value': _('Left push'),
-            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.LPUSH}',
+            'name': f'{RedisListStructureForm.BUTTON_PREFIX}{RedisListStructureForm.Commands.LPUSH}',
         },
         {
             'value': _('Left pop'),
-            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.LPOP}',
+            'name': f'{RedisListStructureForm.BUTTON_PREFIX}{RedisListStructureForm.Commands.LPOP}',
         },
         {
             'value': _('Right push'),
-            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.RPUSH}',
+            'name': f'{RedisListStructureForm.BUTTON_PREFIX}{RedisListStructureForm.Commands.RPUSH}',
         },
         {
             'value': _('Right pop'),
-            'name': f'{RedisListStructureForm.PREFIX}{RedisListStructureForm.Commands.RPOP}',
+            'name': f'{RedisListStructureForm.BUTTON_PREFIX}{RedisListStructureForm.Commands.RPOP}',
         },
     ]
 
@@ -326,16 +281,16 @@ class RedisListBlockPopForm(BaseRedisForm):
         LPOP = 'lpop'
         RPOP = 'rpop'
 
-    PREFIX = '__'
+    BUTTON_PREFIX = '__'
 
     CUSTOM_BUTTONS = [
         {
             'value': _('Left pop'),
-            'name': f'{PREFIX}{Commands.LPOP}',
+            'name': f'{BUTTON_PREFIX}{Commands.LPOP}',
         },
         {
             'value': _('Right pop'),
-            'name': f'{PREFIX}{Commands.RPOP}',
+            'name': f'{BUTTON_PREFIX}{Commands.RPOP}',
         },
     ]
 
@@ -344,38 +299,34 @@ class RedisListBlockPopForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['keys'].widget.choices = get_options(self.user)
+        self.set_options('keys')
 
     @classmethod
-    def get_first_key_with_prefix(cls, dictionary, prefix: str = PREFIX):
+    def get_first_key_with_prefix(cls, dictionary, prefix: str = BUTTON_PREFIX):
         for key in dictionary:
             if key.startswith(prefix):
                 return key
         return None
 
-    def transform_key(self, key):
-        user = self.user
-        prefix = self.redis_prefix
-        return RedisService.form_key(user, prefix, key)
-
     def clean_timeout(self):
-        errors = fields.TimeoutField.clean_timeout(self.cleaned_data, block=True)
+        errors = fields.TimeoutField.clean_timeout(self.cleaned_data, block=False)
         if errors:
             [self.add_error('timeout', error) for error in errors]
         return self.cleaned_data.get('timeout')
 
     def execute(self, command: str):
         data = self.cleaned_data
-        command = command.replace(self.PREFIX, '')
+        command = command.replace(self.BUTTON_PREFIX, '')
 
         keys = data.get('keys')
         timeout = data.get('timeout')
         commands = self.Commands
         with self.service as r:
+            key_transformer = self.form_key
             if command == commands.LPOP:
-                return r.blpop([self.transform_key(key) for key in keys], timeout)
+                return r.blpop(list(map(lambda x: key_transformer(x), keys)), timeout)
             if command == commands.RPOP:
-                return r.brpop([self.transform_key(key) for key in keys], timeout)
+                return r.brpop(list(map(lambda x: key_transformer(x), keys)), timeout)
             return None
 
 
@@ -400,7 +351,7 @@ class RedisListBLMPopForm(BaseRedisForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['keys'].widget.choices = get_options(self.user)
+        self.set_options('keys')
 
     def clean_timeout(self):
         errors = fields.TimeoutField.clean_timeout(self.cleaned_data, block=True)
@@ -412,7 +363,7 @@ class RedisListBLMPopForm(BaseRedisForm):
         data = self.cleaned_data
 
         timeout = data.get('timeout')
-        keys = data.get('keys')
+        keys = [self.form_key(key) for key in data.get('keys')]
         numkeys = len(keys)
         direction = data.get('direction')
         count = data.get('count')

@@ -1,0 +1,40 @@
+{% extends 'Admin/Redis/Hash/redis_hash_base.html' %}
+{% load static i18n hosts %}
+
+{% block activity-tab-hash-table %}active{% endblock %}
+
+{% block extra-libs-css %}
+  <link href="{% static 'inspinia/css/plugins/footable/footable.core.css' %}" rel="stylesheet">
+{% endblock %}
+
+
+{% block breadcrumb %}
+  {{ block.super }}
+  <li>
+    <a href="{% host_url 'admin-redis-hash-table' host 'admin' scheme SITE_SCHEME %}">{% trans 'Table' %}</a>
+  </li>
+{% endblock %}
+
+{% block tab-content %}
+  {% include 'Admin/Redis/Hash/components/redis_hash_form.html' %}
+  {% include 'Admin/Redis/Hash/components/redis_hash_table.html' %}
+{% endblock %}
+
+{% block extra-libs-js %}
+  <script src="{% static 'inspinia/js/plugins/footable/footable.all.min.js' %}"></script>
+{% endblock %}
+
+
+{% block extra-js %}
+  <script>
+    $(document).ready(function () {
+      $('.footable').footable();
+    });
+    
+    document.getElementById('add_more').addEventListener('click', function() {
+            var form_idx = $('#id_form-TOTAL_FORMS').val();
+            $('#formset').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+            $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+        });
+  </script>
+{% endblock %}

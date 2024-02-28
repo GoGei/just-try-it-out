@@ -1,0 +1,34 @@
+{% load i18n %}
+
+{% if data %}
+  <div class="ibox float-e-margins">
+    <div class="ibox-title">
+      <h5>{% trans 'Table' %}</h5>
+      <div class="ibox-tools">
+        <a class="collapse-link">
+          <i class="fa fa-chevron-up"></i>
+        </a>
+      </div>
+    </div>
+    <div class="ibox-content">
+      <table class="footable table table-stripped toggle-arrow-tiny footable-loaded tablet breakpoint"
+             data-page-size="8">
+        <thead>
+        <tr>
+          <th class="footable-visible">{% trans 'Name' %}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in data %}
+          <tr class="{% if forloop.counter0|divisibleby:"2" %}footable-odd{% else %}footable-even{% endif %}"
+              style="display: table-row;">
+            <td class="footable-visible">
+              {{ item.key }}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
