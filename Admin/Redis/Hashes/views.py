@@ -37,3 +37,9 @@ def redis_hash_table(request):
         }
     }
     return render(request, 'Admin/Redis/Hash/redis_hash_table.html', content)
+
+
+@manager_required
+def redis_hash_table_test(request):
+    form = RedisFieldFormSet2(request.POST or None)
+    return render(request, 'Admin/Redis/Hash/redis_hash_test.html', {'form': form})

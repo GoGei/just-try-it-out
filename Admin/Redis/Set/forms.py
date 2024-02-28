@@ -19,7 +19,7 @@ class BaseRedisForm(redis_forms.BaseRedisForm):
         return [self.cleaned_data.get('key')]
 
 
-class RedisSetTableForm(BaseRedisForm, redis_forms.BaseRedisSearchForm):
+class RedisSetTableForm(redis_forms.BaseRedisSearchForm):
     pass
 
 

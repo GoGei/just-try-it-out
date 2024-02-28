@@ -30,11 +30,5 @@
     $(document).ready(function () {
       $('.footable').footable();
     });
-    
-    document.getElementById('add_more').addEventListener('click', function() {
-            var form_idx = $('#id_form-TOTAL_FORMS').val();
-            $('#formset').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
-            $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
-        });
   </script>
 {% endblock %}

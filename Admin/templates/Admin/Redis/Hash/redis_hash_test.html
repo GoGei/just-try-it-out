@@ -1,0 +1,10 @@
+{% extends 'Admin/Redis/Hash/redis_hash_base.html' %}
+{% load static i18n hosts %}
+
+{% block activity-tab-hash-table %}active{% endblock %}
+
+
+{% block tab-content %}
+  !{{ form.management_form }}!
+  {{ form.as_table }}
+{% endblock %}

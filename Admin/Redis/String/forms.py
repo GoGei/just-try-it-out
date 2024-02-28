@@ -55,7 +55,7 @@ class RedisStringSetForm(BaseRedisForm):
             return r.set(key, data.get('value'), **extra)
 
 
-class RedisStringTableForm(BaseRedisForm, redis_forms.BaseRedisSearchForm):
+class RedisStringTableForm(redis_forms.BaseRedisSearchForm):
     pass
 
 

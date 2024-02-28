@@ -20,7 +20,7 @@ class BaseRedisForm(redis_forms.BaseRedisForm):
                          } for key in keys)
 
 
-class RedisListTableForm(BaseRedisForm, redis_forms.BaseRedisSearchForm):
+class RedisListTableForm(redis_forms.BaseRedisSearchForm):
     pass
 
 
