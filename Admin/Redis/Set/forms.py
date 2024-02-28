@@ -310,7 +310,6 @@ class RedisSetUnionForm(BaseRedisForm):
 
     def union(self):
         data = self.cleaned_data
-
         destination = data.get('destination')
         keys = [self.form_key(key) for key in data.get('keys')]
 
