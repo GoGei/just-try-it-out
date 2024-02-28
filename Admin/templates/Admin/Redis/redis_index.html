@@ -41,7 +41,7 @@
             <div class="forum-sub-title">
               {% trans 'Iterate over structures' %}: {% trans 'Do not use keys, use scans (like pagination)' %}
               <br>
-              {% trans 'Sets' %}: SITERCARD, SISMEMGER, SMEMEBERS, SMISMEMBER, SMOVE, SPOP, SRANGEMEMBER, SREM, SUNION,
+              {% trans 'Sets' %}: SINTERCARD, SISMEMGER, SMISMEMBER, SMOVE, SPOP, SRANGEMEMBER, SREM, SUNION,
               SUNIONSTORE
             </div>
           </div>
@@ -56,7 +56,7 @@
             <div class="forum-icon">
               <i class="fa fa-pencil"></i>
             </div>
-            <a href="{% host_url 'admin-redis-string-table' host 'admin' %}"
+            <a href="{% host_url 'admin-redis-string-table' host 'admin' scheme SITE_SCHEME %}"
                class="forum-item-title">{% trans 'Strings' %}</a>
             <div class="forum-sub-title">
               {% trans 'String docs' %}: <a href="https://redis.io/docs/data-types/strings/"
@@ -74,7 +74,7 @@
             <div class="forum-icon">
               <i class="fa fa-pencil"></i>
             </div>
-            <a href="{% host_url 'admin-redis-list-table' host 'admin' %}"
+            <a href="{% host_url 'admin-redis-list-table' host 'admin' scheme SITE_SCHEME %}"
                class="forum-item-title">{% trans 'Lists' %}</a>
             <div class="forum-sub-title">
               {% trans 'List docs' %}: <a href="https://redis.io/docs/data-types/lists/"
@@ -92,7 +92,7 @@
             <div class="forum-icon">
               <i class="fa fa-pencil"></i>
             </div>
-            <a href="{% host_url 'admin-redis-set-table' host 'admin' %}"
+            <a href="{% host_url 'admin-redis-set-table' host 'admin' scheme SITE_SCHEME %}"
                class="forum-item-title">{% trans 'Set' %}</a>
             <div class="forum-sub-title">
               {% trans 'Set docs' %}: <a href="https://redis.io/docs/data-types/sets/"

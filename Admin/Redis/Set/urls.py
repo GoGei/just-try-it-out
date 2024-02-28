@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     url(r'$', views.redis_set_table, name='admin-redis-set-table'),
+    url(r'members/$', views.redis_set_members, name='admin-redis-set-members'),
     url(r'add/$', views.redis_set_add, name='admin-redis-set-add'),
     url(r'cardinality/$', views.redis_set_cardinality, name='admin-redis-set-cardinality'),
     url(r'difference/$', views.redis_set_difference, name='admin-redis-set-difference'),

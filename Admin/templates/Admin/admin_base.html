@@ -47,13 +47,13 @@
             <ul class="dropdown-menu animated fadeInRight m-t-xs">
               <li><a href="#">{% trans 'Profile' %}</a></li>
               <li class="divider"></li>
-              <li><a href="{% host_url 'admin-logout' host 'admin' %}">{% trans 'Logout' %}</a></li>
+              <li><a href="{% host_url 'admin-logout' host 'admin' scheme SITE_SCHEME %}">{% trans 'Logout' %}</a></li>
             </ul>
           </div>
         </li>
 
         <li class="{% block menu-home-active %}{% endblock %}">
-          <a href="{% host_url 'admin-index' host 'admin' %}">
+          <a href="{% host_url 'admin-index' host 'admin' scheme SITE_SCHEME %}">
             <i class="fa fa-home"></i>
             <span class="nav-label">{% trans 'Home' %}</span>
           </a>
@@ -63,16 +63,16 @@
               class="fa arrow"></span></a>
           <ul class="nav nav-second-level {% block menu-redis-active-open %}{% endblock %}" style="">
             <li class="{% block menu-redis-index-active %}{% endblock %}">
-              <a href="{% host_url 'admin-redis-index' host 'admin' %}">{% trans 'Index' %}</a>
+              <a href="{% host_url 'admin-redis-index' host 'admin' scheme SITE_SCHEME %}">{% trans 'Index' %}</a>
             </li>
             <li class="{% block menu-redis-string-active %}{% endblock %}">
-              <a href="{% host_url 'admin-redis-string-table' host 'admin' %}">{% trans 'String' %}</a>
+              <a href="{% host_url 'admin-redis-string-table' host 'admin' scheme SITE_SCHEME %}">{% trans 'String' %}</a>
             </li>
             <li class="{% block menu-redis-list-active %}{% endblock %}">
-              <a href="{% host_url 'admin-redis-list-table' host 'admin' %}">{% trans 'List' %}</a>
+              <a href="{% host_url 'admin-redis-list-table' host 'admin' scheme SITE_SCHEME %}">{% trans 'List' %}</a>
             </li>
             <li class="{% block menu-redis-set-active %}{% endblock %}">
-              <a href="{% host_url 'admin-redis-set-table' host 'admin' %}">{% trans 'Set' %}</a>
+              <a href="{% host_url 'admin-redis-set-table' host 'admin' scheme SITE_SCHEME %}">{% trans 'Set' %}</a>
             </li>
           </ul>
         </li>
@@ -95,7 +95,7 @@
         </div>
         <ul class="nav navbar-top-links navbar-right">
           <li>
-            <a href="{% host_url 'admin-logout' host 'admin' %}">
+            <a href="{% host_url 'admin-logout' host 'admin' scheme SITE_SCHEME %}">
               <i class="fa fa-sign-out"></i> {% trans 'Log out' %}
             </a>
           </li>
@@ -108,7 +108,7 @@
         <ol class="breadcrumb">
           {% block breadcrumb %}
             <li>
-              <a href="{% host_url 'admin-index' host 'admin' %}">{% trans 'Home' %}</a>
+              <a href="{% host_url 'admin-index' host 'admin' scheme SITE_SCHEME %}">{% trans 'Home' %}</a>
             </li>
           {% endblock %}
         </ol>

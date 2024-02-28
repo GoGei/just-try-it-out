@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.utils.translation import ugettext_lazy as _
 from core.Utils.Access.decorators import manager_required
 from .forms import (
-    RedisSetTableForm, RedisSetAddForm, RedisSetCardForm, RedisSetDiffForm, RedisSetInterForm
+    RedisSetTableForm, RedisSetAddForm, RedisSetCardForm, RedisSetDiffForm, RedisSetInterForm, RedisSetMembersForm
 )
 
 
@@ -20,10 +20,7 @@ def redis_set_table(request):
             if '_clear' in request.POST:
                 result = body.clear()
                 msg = _(f'Clean executed with result: {result}')
-                if result:
-                    messages.info(request, msg)
-                else:
-                    messages.warning(request, msg)
+                messages.info(request, msg)
                 return redirect(reverse('admin-redis-set-table', host='admin'))
             else:
                 data = body.apply_search()
@@ -43,6 +40,34 @@ def redis_set_table(request):
 
 
 @manager_required
+def redis_set_members(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-set-get', host='admin'))
+
+    body = RedisSetMembersForm(request.POST or None, user=request.user)
+    sets = None
+    if body.is_valid():
+        try:
+            result = body.members()
+            msg = _(f'Get executed with result: {result}')
+            messages.info(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+        sets = body.get_sets_on_work()
+
+    context = {
+        'sets': sets,
+        'form': {
+            'body': body,
+            'title': _('Set members'),
+            'buttons': {'save': True, 'cancel': True}
+        }
+    }
+    return render(request, 'Admin/Redis/Set/redis_set_members.html', context)
+
+
+@manager_required
 def redis_set_add(request):
     if '_cancel' in request.POST:
         return redirect(reverse('admin-redis-set-add', host='admin'))
@@ -53,14 +78,11 @@ def redis_set_add(request):
         try:
             result = body.add()
             msg = _(f'Add executed with result: {result}')
-            if result:
-                messages.info(request, msg)
-            else:
-                messages.warning(request, msg)
+            messages.info(request, msg)
         except Exception as e:
             msg = _(f'Command raised exception: {str(e)}')
             messages.error(request, msg)
-        sets = body.get_sets_on_work(body.get_keys_on_work())
+        sets = body.get_sets_on_work()
 
     context = {
         'sets': sets,
@@ -84,14 +106,11 @@ def redis_set_cardinality(request):
         try:
             result = body.cardinality()
             msg = _(f'Cardinality executed with result: {result}')
-            if result:
-                messages.info(request, msg)
-            else:
-                messages.warning(request, msg)
+            messages.info(request, msg)
         except Exception as e:
             msg = _(f'Command raised exception: {str(e)}')
             messages.error(request, msg)
-        sets = body.get_sets_on_work(body.get_keys_on_work())
+        sets = body.get_sets_on_work()
 
     context = {
         'sets': sets,
@@ -115,14 +134,11 @@ def redis_set_difference(request):
         try:
             result = body.difference()
             msg = _(f'Difference executed with result: {result}')
-            if result:
-                messages.info(request, msg)
-            else:
-                messages.warning(request, msg)
+            messages.info(request, msg)
         except Exception as e:
             msg = _(f'Command raised exception: {str(e)}')
             messages.error(request, msg)
-        sets = body.get_sets_on_work(body.get_keys_on_work())
+        sets = body.get_sets_on_work()
 
     context = {
         'sets': sets,
@@ -146,14 +162,11 @@ def redis_set_intersect(request):
         try:
             result = body.intersect()
             msg = _(f'Intersect executed with result: {result}')
-            if result:
-                messages.info(request, msg)
-            else:
-                messages.warning(request, msg)
+            messages.info(request, msg)
         except Exception as e:
             msg = _(f'Command raised exception: {str(e)}')
             messages.error(request, msg)
-        sets = body.get_sets_on_work(body.get_keys_on_work())
+        sets = body.get_sets_on_work()
 
     context = {
         'sets': sets,

@@ -48,7 +48,8 @@ class BaseRedisForm(forms.Form):
             keys = r.keys(key)
             return list({'key': key.replace(base_key, '')} for key in keys)
 
-    def get_sets_on_work(self, keys: list):
+    def get_sets_on_work(self):
+        keys = self.get_keys_on_work()
         with self.service as r:
             sets = [{'key': key,
                      'members': r.smembers(f'{self.base_key}:{key}')} for key in keys]
@@ -154,3 +155,13 @@ class RedisSetInterForm(BaseRedisForm):
         destination = [data.get('destination')] or []
         keys = data.get('keys')
         return keys + destination
+
+
+class RedisSetMembersForm(BaseRedisForm):
+    key = fields.KeyField()
+
+    def members(self):
+        data = self.cleaned_data
+        key = self.form_key(data.get('key'))
+        with self.service as r:
+            return r.smembers(key)
