@@ -1,40 +1,10 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from .. import fields
-from ..service import RedisService
+from .. import fields, forms as redis_forms
 
 
-class BaseRedisForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user')
-        self.service = RedisService()
-        self.redis_prefix = 'string'
-        self.base_key = RedisService.form_key(self.user, self.redis_prefix)
-        super().__init__(*args, **kwargs)
-
-    def clean_key(self):
-        search = self.cleaned_data.get('key')
-        if search:
-            search = search.strip()
-        return search
-
-    def clean_value(self):
-        search = self.cleaned_data.get('value')
-        if search:
-            search = search.strip()
-        return search
-
-    def clean(self):
-        cleaned_data = self.cleaned_data
-        nx = cleaned_data.get('nx')
-        xx = cleaned_data.get('xx')
-
-        if xx and nx:
-            msg = _('NX and XX is not allowed to set together')
-            self.add_error('nx', msg)
-            self.add_error('xx', msg)
-
-        return cleaned_data
+class BaseRedisForm(redis_forms.BaseRedisForm):
+    REDIS_PREFIX = 'string'
 
     def get_data(self, key: str = '*'):
         key = f'{self.base_key}:{key}'
@@ -51,9 +21,6 @@ class BaseRedisForm(forms.Form):
                          'ttl': None if ttl == -1 else ttl
                          } for key, value, ttl in sorted(zip(clean_keys, values, ttls), key=lambda x: x[0]))
 
-    def get(self):
-        return self.get_data()
-
 
 class RedisStringSetForm(BaseRedisForm):
     key = fields.KeyField()
@@ -62,12 +29,24 @@ class RedisStringSetForm(BaseRedisForm):
     nx = fields.NxField()
     xx = fields.XxField()
 
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        nx = cleaned_data.get('nx')
+        xx = cleaned_data.get('xx')
+
+        if xx and nx:
+            msg = _('NX and XX is not allowed to set together')
+            self.add_error('nx', msg)
+            self.add_error('xx', msg)
+
+        return cleaned_data
+
     def set(self):
         data = self.cleaned_data
         keys = ('ex', 'nx', 'xx')
 
         with self.service as r:
-            key = RedisService.form_key(self.user, self.redis_prefix, data.get('key'))
+            key = self.form_key(data.get('key'))
             extra = {
                 key: value
                 for key, value in data.items()
@@ -76,31 +55,16 @@ class RedisStringSetForm(BaseRedisForm):
             return r.set(key, data.get('value'), **extra)
 
 
-class RedisStringTableForm(BaseRedisForm):
-    search = forms.CharField(label=_('Term to search'), required=False)
-
-    def clean_search(self):
-        search = self.cleaned_data.get('search')
-        if search:
-            search = search.strip()
-        return search
-
-    def apply_search(self):
-        search = self.cleaned_data.get('search')
-        return self.get_data(search)
-
-    def clear(self):
-        search = self.cleaned_data.get('search')
-        with self.service as r:
-            if search:
-                names = tuple(map(lambda x: f'{self.base_key}:{x.strip()}', search.split()))
-            else:
-                names = r.keys(f'{self.base_key}:*')
-            return r.delete(*names)
+class RedisStringTableForm(redis_forms.BaseRedisSearchForm):
+    pass
 
 
 class RedisStringDeleteForm(BaseRedisForm):
-    key = fields.KeyField()
+    key = fields.KeyWithOptionsField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_options('key')
 
     def delete(self):
         data = self.cleaned_data
@@ -115,9 +79,6 @@ class RedisStringCounterForm(BaseRedisForm):
     value = forms.CharField(label=_('Try to path string :)'), required=False)
     int_value = forms.IntegerField(required=False)
     float_value = forms.FloatField(required=False)
-
-    def clean_value(self):
-        return self.cleaned_data.get('value')
 
     def clean(self):
         data = self.cleaned_data
@@ -154,24 +115,31 @@ class RedisStringCounterForm(BaseRedisForm):
 
 
 class RedisStringGetDelForm(BaseRedisForm):
-    key = fields.KeyField()
+    key = fields.KeyWithOptionsField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_options('key')
 
     def get_del(self):
         with self.service as r:
             key = self.cleaned_data.get('key')
-            return r.getdel(f"{self.base_key}:{key}")
+            return r.getdel(self.form_key(key))
 
 
 class RedisStringGetRangeForm(BaseRedisForm):
-    key = fields.KeyField()
+    key = fields.KeyWithOptionsField()
     start = forms.IntegerField(label=_('Start'))
     end = forms.IntegerField(label=_('End'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_options('key')
 
     def get_range(self):
         data = self.cleaned_data
         with self.service as r:
-            key = data.get('key')
-            key = f"{self.base_key}:{key}"
+            key = self.form_key(data.get('key'))
             return r.getrange(key, data.get('start'), data.get('end'))
 
 
@@ -180,20 +148,25 @@ class RedisStringGetSetForm(BaseRedisForm):
     value = fields.ValueField()
 
     def get_set(self):
+        data = self.cleaned_data
         with self.service as r:
-            key = self.cleaned_data.get('key')
             value = self.cleaned_data.get('value')
-            return r.getset(f"{self.base_key}:{key}", value)
+            return r.getset(self.form_key(data.get('key')), value)
 
 
 class RedisStringLCSForm(BaseRedisForm):
-    key1 = fields.KeyField(label=_('Key-1'))
-    key2 = fields.KeyField(label=_('Key-2'))
+    key1 = fields.KeyWithOptionsField(label=_('Key-1'))
+    key2 = fields.KeyWithOptionsField(label=_('Key-2'))
 
     with_len = forms.BooleanField(label=_('With length'), required=False)
     with_idx = forms.BooleanField(label=_('With index'), required=False)
     minmatchlen = forms.IntegerField(label=_('With minimum match length'), min_value=1, required=False)
     with_matchlen = forms.BooleanField(label=_('With matches length'), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_options('key1')
+        self.set_options('key2')
 
     def lcs(self):
         data = self.cleaned_data

@@ -30,11 +30,36 @@ class KeyWithOptionsField(KeyField):
 
         super().__init__(*args, **kwargs)
 
+    def clean(self, value):
+        value = super().clean(value)
+        if not value:
+            return value
+        return value.strip()
+
 
 class ValueField(forms.CharField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('label', _('Value'))
         super().__init__(*args, **kwargs)
+
+    def clean(self, value):
+        value = super().clean(value)
+        if not value:
+            return value
+        return value.strip()
+
+
+class SearchValueField(forms.CharField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label', _('Term to search'))
+        kwargs.setdefault('required', False)
+        super().__init__(*args, **kwargs)
+
+    def clean(self, value):
+        value = super().clean(value)
+        if not value:
+            return value
+        return value.strip()
 
 
 class MultipleValuesField(forms.CharField):
@@ -111,7 +136,7 @@ class TimeoutField(forms.IntegerField):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def clean_timeout(cls, cleaned_data, block: bool = True) -> list:
+    def clean_timeout(cls, cleaned_data, block: bool = False) -> list:
         block = block if block in (True, False) else cleaned_data.get('block')
         timeout = cleaned_data.get('timeout')
 

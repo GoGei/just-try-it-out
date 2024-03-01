@@ -1,0 +1,31 @@
+{% extends 'Admin/Redis/redis_base.html' %}
+{% load static i18n hosts %}
+
+{% block menu-redis-hash-active %} active {% endblock %}
+
+{% block breadcrumb %}
+  {{ block.super }}
+  <li>
+    <a href="{% host_url 'admin-redis-hash-table' host 'admin' scheme SITE_SCHEME %}">{% trans 'Hashes' %}</a>
+  </li>
+{% endblock %}
+
+{% block content %}
+  <div class="tabs-container">
+    <ul class="nav nav-tabs">
+      <li class="{% block activity-tab-hash-table %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-hash-table' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Table' %}</a>
+      </li>
+      <li class="{% block activity-tab-hash-form %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-hash-form' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Form' %}</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane active">
+        <div class="panel-body">
+          {% block tab-content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
