@@ -16,6 +16,9 @@
       <li class="{% block activity-tab-hash-table %}{% endblock %}">
         <a href="{% host_url 'admin-redis-hash-table' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Table' %}</a>
       </li>
+      <li class="{% block activity-tab-hash-form %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-hash-form' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Form' %}</a>
+      </li>
     </ul>
     <div class="tab-content">
       <div class="tab-pane active">

@@ -1,10 +1,11 @@
+import json
 from django_hosts import reverse
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.utils.translation import ugettext_lazy as _
 from core.Utils.Access.decorators import manager_required
 from .forms import (
-    RedisHashTableForm, RedisFieldFormSet2
+    RedisHashTableForm, RedisHashForm
 )
 
 
@@ -40,6 +41,22 @@ def redis_hash_table(request):
 
 
 @manager_required
-def redis_hash_table_test(request):
-    form = RedisFieldFormSet2(request.POST or None)
-    return render(request, 'Admin/Redis/Hash/redis_hash_test.html', {'form': form})
+def redis_hash_form(request):
+    form_body = RedisHashForm(user=request.user)
+    if request.is_ajax():
+        data = json.loads(request.body)
+
+        response = None
+        if request.method.lower() == 'post':
+            response = form_body.create(data)
+        if request.method.lower() == 'delete':
+            response = form_body.delete(data)
+        print(response)
+
+    context = {
+        'form': {
+            'body': form_body,
+            'action_url': reverse('admin-redis-hash-form', host='admin'),
+        }
+    }
+    return render(request, 'Admin/Redis/Hash/redis_hash_form.html', context)

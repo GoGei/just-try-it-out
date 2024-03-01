@@ -1,0 +1,141 @@
+{% extends 'Admin/Redis/Hash/redis_hash_base.html' %}
+{% load static i18n hosts %}
+
+{% block activity-tab-hash-form %}active{% endblock %}
+
+
+{% block tab-content %}
+  <form role="form" action="{{ form.action_url }}" method="post" id="hashtableForm">
+    {% include 'base_form_field.html' with field=form.body.hash_name %}
+
+    {% csrf_token %}
+    <div class="form-group row">
+      <div class="form-group col col-lg-5">
+        <input type="text" name="key-1" class="form-control" id="id_key1"
+               placeholder="{% trans 'Key' %}">
+      </div>
+      <div class="form-group col col-lg-5">
+        <input type="text" name="value-1" class="form-control" id="id_value1"
+               placeholder="{% trans 'Value' %}">
+      </div>
+      <div class="form-group col col-lg-2">
+        <button class="btn btn-danger dim btn-drop-row" type="button" id="id_btn_delete{{ i }}"><i
+            class="fa fa-trash"></i>
+        </button>
+      </div>
+    </div>
+    <div class="form_buttons">
+      <button class="btn btn-success dim" type="button" id="sendBtn"><i class="fa fa-send"></i></button>
+      <button class="btn btn-success dim" type="button" id="refreshBtn"><i class="fa fa-refresh"></i></button>
+      <button class="btn btn-info dim" type="button" id="addRowBtn"><i class="fa fa-plus"></i></button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block extra-js %}
+  <script>
+    $(document).ready(function () {
+      let $form = $('#hashtableForm');
+
+      $("#refreshBtn").click(function () {
+        $form[0].reset();
+      });
+
+      $('#sendBtn').click(function (e) {
+        e.preventDefault();
+
+        let formDataJSON = serializeFormToJSON($form);
+        console.log(formDataJSON)
+
+        $.ajax({
+          type: "POST",
+          url: $form.attr('action'),
+          data: JSON.stringify(formDataJSON),
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function (response) {
+            console.log(response);
+          },
+          error: function (err) {
+            console.error(err);
+          }
+        });
+      });
+
+      $(document).on('click', '.btn-drop-row', function () {
+        let $row = $(this).closest('.form-group.row');
+        let key = $row.find('input[name^="key"]').val();
+        $row.remove();
+
+        let data = {
+          "key": key,
+          "hash_name": $('#id_hash_name').val()
+        }
+
+        $.ajax({
+          type: "DELETE",
+          url: $form.attr('action'),
+          data: JSON.stringify(data),
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function (response) {
+            console.log(response);
+          },
+          error: function (err) {
+            console.error(err);
+          }
+        });
+      });
+
+      $("#addRowBtn").click(function () {
+        let newRow = $('.form-group.row').last().clone();
+
+        newRow.find('input').val('');
+        newRow.find('input').each(function () {
+          let newNameAttr = $(this).attr('name').replace(/\d+$/, function (str) {
+            return parseInt(str) + 1;
+          });
+          let newIdAttr = $(this).attr('id').replace(/\d+$/, function (str) {
+            return parseInt(str) + 1;
+          });
+          $(this).attr('name', newNameAttr);
+          $(this).attr('id', newIdAttr);
+        });
+
+        newRow.find('.btn-drop-row').removeAttr('id');
+
+        $('#hashtableForm .form_buttons').before(newRow);
+      });
+    });
+
+    function serializeFormToJSON($form) {
+      let formArray = $form.serializeArray();
+      let itemsArray = [];
+
+      let formDataJSON = {};
+
+      // Process each form input
+      $.each(formArray, function () {
+        let match = this.name.match(/(key|value)-(\d+|\w+)/);
+        if (match) {
+          let type = match[1];
+          let index = match[2];
+
+          if (!itemsArray[index]) {
+            itemsArray[index] = {key: '', value: ''};
+          }
+          itemsArray[index][type] = this.value || '';
+        }
+      });
+
+      itemsArray = itemsArray.filter(function (item) {
+        return item !== undefined;
+      });
+
+      formDataJSON['hash_name'] = $('#id_hash_name').val();
+      formDataJSON['items'] = itemsArray;
+
+      return formDataJSON;
+    }
+  </script>
+{% endblock %}
