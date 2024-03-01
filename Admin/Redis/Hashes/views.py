@@ -1,6 +1,7 @@
 import json
 from django_hosts import reverse
 from django.contrib import messages
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.translation import ugettext_lazy as _
 from core.Utils.Access.decorators import manager_required
@@ -46,12 +47,20 @@ def redis_hash_form(request):
     if request.is_ajax():
         data = json.loads(request.body)
 
-        response = None
+        response = {}
+        status = 200
         if request.method.lower() == 'post':
+            form_body.validate_create(data)
+            errors = form_body.redis_errors
+            if errors:
+                return JsonResponse(errors, status=400, safe=False)
+
             response = form_body.create(data)
+            status = 201
         if request.method.lower() == 'delete':
             response = form_body.delete(data)
-        print(response)
+            status = 200
+        return JsonResponse(response, status=status, safe=False)
 
     context = {
         'form': {
