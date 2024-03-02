@@ -42,14 +42,25 @@ def redis_hash_table(request):
 
 
 @manager_required
+def redis_hash_keys(request):
+    body = RedisHashTableForm(user=request.user)
+    return JsonResponse(body.get(), safe=False)
+
+
+@manager_required
 def redis_hash_form(request):
     form_body = RedisHashForm(user=request.user)
     if request.is_ajax():
-        data = json.loads(request.body)
-
         response = {}
         status = 200
+        if request.method.lower() == 'get':
+            key = request.GET.get('key')
+            response = form_body.get_key(key)
+            if response:
+                return JsonResponse(response, status=200, safe=False)
+
         if request.method.lower() == 'post':
+            data = json.loads(request.body)
             form_body.validate_create(data)
             errors = form_body.redis_errors
             if errors:
@@ -58,6 +69,7 @@ def redis_hash_form(request):
             response = form_body.create(data)
             status = 201
         if request.method.lower() == 'delete':
+            data = json.loads(request.body)
             response = form_body.delete(data)
             status = 200
         return JsonResponse(response, status=status, safe=False)
@@ -65,6 +77,7 @@ def redis_hash_form(request):
     context = {
         'form': {
             'body': form_body,
+            'data_keys_url': reverse('admin-redis-hash-keys', host='admin'),
             'action_url': reverse('admin-redis-hash-form', host='admin'),
         }
     }

@@ -49,3 +49,5 @@ function initSelect2($field) {
 
     $field.select2(ajaxConfig);
 }
+
+DEFAULT_PAGE_SIZE = 50;

@@ -5,7 +5,8 @@
 
 
 {% block tab-content %}
-  <form role="form" action="{{ form.action_url }}" method="post" id="hashtableForm">
+  <form role="form" action="{{ form.action_url }}" method="post" id="hashtableForm"
+        data-keys-url="{{ form.data_keys_url }}">
     {% include 'base_form_field.html' with field=form.body.hash_name %}
 
     {% csrf_token %}
