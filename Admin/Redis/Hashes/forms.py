@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from .. import fields, forms as redis_forms
 from .serializers.serializers import RedisHashCreateSerializer
+from django_hosts import reverse
 
 PREFIX = 'hash'
 
@@ -22,7 +23,7 @@ class RedisHashForm(BaseRedisHashForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.set_options('hash_name')
+        # self.set_options('hash_name')
 
         actions = self.Actions
         self.serializers_map = {
@@ -61,3 +62,11 @@ class RedisHashForm(BaseRedisHashForm):
         hash_name = self.form_key(hash_name)
         with self.service as r:
             return r.hdel(hash_name, *[key])
+
+    def get_key(self, key: str):
+        if not key:
+            return None
+
+        with self.service as r:
+            hash_name = self.form_key(key)
+            return r.hgetall(hash_name)
