@@ -1,0 +1,21 @@
+{% extends 'Admin/Redis/Hash/redis_hash_base.html' %}
+{% load static i18n hosts %}
+
+{% block activity-tab-hash-info %}active{% endblock %}
+
+
+{% block tab-content %}
+  <form role="form" action="{{ form.action_url }}" method="post" id="hashtableForm"
+        data-keys-url="{{ form.data_keys_url }}">
+    {% include 'base_form_field.html' with field=form.body.hash_name %}
+
+    {% csrf_token %}
+    <div id="form-rows">
+      {% include 'Admin/Redis/Hash/form/redis_hash_table_info.html' %}
+    </div>
+  </form>
+{% endblock %}
+
+{% block extra-js %}
+  <script src="{% static 'js/admin/redis/hash/info.js' %}"></script>
+{% endblock %}

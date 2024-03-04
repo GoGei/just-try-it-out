@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 from django.utils.translation import ugettext_lazy as _
 from core.Utils.Access.decorators import manager_required
 from .forms import (
-    RedisHashTableForm, RedisHashForm
+    RedisHashTableForm, RedisHashForm, RedisHashInfoForm
 )
 
 
@@ -78,3 +78,23 @@ def redis_hash_form(request):
         }
     }
     return render(request, 'Admin/Redis/Hash/redis_hash_form.html', context)
+
+
+@manager_required
+def redis_hash_info(request):
+    form_body = RedisHashInfoForm(user=request.user)
+    if request.is_ajax():
+        response = {}
+        if request.method.lower() == 'get':
+            key = request.GET.get('key')
+            response = form_body.get_key_info(key)
+        return render(request, 'Admin/Redis/Hash/form/redis_hash_table_info.html', response)
+
+    context = {
+        'form': {
+            'body': form_body,
+            'data_keys_url': reverse('admin-redis-hash-keys', host='admin'),
+            'action_url': reverse('admin-redis-hash-info', host='admin'),
+        }
+    }
+    return render(request, 'Admin/Redis/Hash/redis_hash_table_info.html', context)

@@ -6,7 +6,7 @@
 {% block breadcrumb %}
   {{ block.super }}
   <li>
-    <a href="{% host_url 'admin-redis-set-rand-member' host 'admin' scheme SITE_SCHEME %}">{% trans 'Rand member' %}</a>
+    <a href="{% host_url 'admin-redis-set-rand-member' host 'admin' %}">{% trans 'Rand member' %}</a>
   </li>
 {% endblock %}
 

@@ -85,3 +85,24 @@ class RedisHashForm(BaseRedisHashForm):
             except Exception:
                 pass
         return items
+
+
+class RedisHashInfoForm(BaseRedisHashForm):
+    hash_name = fields.KeyWithOptionsField(label=_('Hash name'))
+
+    def get_key_info(self, key: str):
+        key = self.form_key(key)
+        with self.service as r:
+            full_table = r.hgetall(key)
+            keys = r.hkeys(key)
+            values = r.hvals(key)
+            hlen = r.hlen(key)
+
+            data = {
+                'full_table': full_table,
+                'keys': keys,
+                'values': values,
+                'hlen': hlen
+            }
+
+        return data

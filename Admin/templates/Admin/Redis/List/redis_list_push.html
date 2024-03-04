@@ -6,7 +6,7 @@
 {% block breadcrumb %}
   {{ block.super }}
   <li>
-    <a href="{% host_url 'admin-redis-list-push' host 'admin' scheme SITE_SCHEME %}">{% trans 'Push' %}</a>
+    <a href="{% host_url 'admin-redis-list-push' host 'admin' %}">{% trans 'Push' %}</a>
   </li>
 {% endblock %}
 
