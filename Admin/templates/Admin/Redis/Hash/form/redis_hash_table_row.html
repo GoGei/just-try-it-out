@@ -1,0 +1,18 @@
+{% load i18n %}
+<div class="form-group row">
+  <div class="form-group col col-lg-5">
+    <input type="text" name="key-{{ counter }}" class="form-control key-class"
+           id="id_key{{ counter }}"
+           placeholder="{% trans 'Key' %}" {% if item.key %}value="{{ item.key }}"{% endif %}>
+  </div>
+  <div class="form-group col col-lg-5">
+    <input type="text" name="value-{{ counter }}" class="form-control value-class"
+           id="id_value{{ counter }}"
+           placeholder="{% trans 'Value' %}" {% if item.value %}value="{{ item.value }}"{% endif %}>
+  </div>
+  <div class="form-group col col-lg-2">
+    <button class="btn btn-danger dim btn-drop-row" type="button" id="id_btn_delete{{ counter }}"><i
+        class="fa fa-trash"></i>
+    </button>
+  </div>
+</div>

@@ -51,28 +51,24 @@ def redis_hash_keys(request):
 def redis_hash_form(request):
     form_body = RedisHashForm(user=request.user)
     if request.is_ajax():
-        response = {}
-        status = 200
+        items = []
         if request.method.lower() == 'get':
             key = request.GET.get('key')
-            response = form_body.get_key(key)
-            if response:
-                return JsonResponse(response, status=200, safe=False)
+            items = form_body.response_to_list_of_dicts(form_body.get_key(key))
 
-        if request.method.lower() == 'post':
+        elif request.method.lower() == 'post':
             data = json.loads(request.body)
             form_body.validate_create(data)
             errors = form_body.redis_errors
             if errors:
                 return JsonResponse(errors, status=400, safe=False)
 
-            response = form_body.create(data)
-            status = 201
-        if request.method.lower() == 'delete':
+            items = form_body.response_to_list_of_dicts(form_body.create(data))
+        elif request.method.lower() == 'delete':
             data = json.loads(request.body)
-            response = form_body.delete(data)
-            status = 200
-        return JsonResponse(response, status=status, safe=False)
+            items = form_body.response_to_list_of_dicts(form_body.delete(data))
+
+        return render(request, 'Admin/Redis/Hash/form/redis_hash_table_rows.html', {'items': items})
 
     context = {
         'form': {

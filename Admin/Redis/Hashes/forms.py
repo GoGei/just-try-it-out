@@ -70,3 +70,18 @@ class RedisHashForm(BaseRedisHashForm):
         with self.service as r:
             hash_name = self.form_key(key)
             return r.hgetall(hash_name)
+
+    @classmethod
+    def response_to_list_of_dicts(cls, response):
+        items = []
+        if response:
+            try:
+                items = [
+                    {
+                        'key': key,
+                        'value': value
+                    } for key, value in response.items()
+                ]
+            except Exception:
+                pass
+        return items
