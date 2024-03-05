@@ -1,7 +1,7 @@
+from django import forms
 from django.utils.translation import ugettext_lazy as _
 from .. import fields, forms as redis_forms
 from .serializers.serializers import RedisHashCreateSerializer
-from django_hosts import reverse
 
 PREFIX = 'hash'
 
@@ -70,3 +70,65 @@ class RedisHashForm(BaseRedisHashForm):
         with self.service as r:
             hash_name = self.form_key(key)
             return r.hgetall(hash_name)
+
+    @classmethod
+    def response_to_list_of_dicts(cls, response):
+        items = []
+        if response:
+            try:
+                items = [
+                    {
+                        'key': key,
+                        'value': value
+                    } for key, value in response.items()
+                ]
+            except Exception:
+                pass
+        return items
+
+
+class RedisHashInfoForm(BaseRedisHashForm):
+    hash_name = fields.KeyWithOptionsField(label=_('Hash name'))
+
+    def get_key_info(self, key: str):
+        key = self.form_key(key)
+        with self.service as r:
+            full_table = r.hgetall(key)
+            keys = r.hkeys(key)
+            values = r.hvals(key)
+            hlen = r.hlen(key)
+
+            data = {
+                'full_table': full_table,
+                'keys': keys,
+                'values': values,
+                'hlen': hlen
+            }
+
+        return data
+
+
+class RedisHashRandFieldsForm(BaseRedisHashForm):
+    key = fields.KeyWithOptionsField(with_tags=False)
+    count = forms.IntegerField(required=False)
+    withvalues = forms.BooleanField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_options('key')
+
+    def rand_fields(self):
+        data = self.cleaned_data
+        key = data.get('key')
+        count = data.get('count')
+        withvalues = data.get('withvalues')
+
+        kwargs = {}
+        if count is not None:
+            kwargs['count'] = count
+        if withvalues is not None:
+            kwargs['withvalues'] = withvalues
+
+        with self.service as r:
+            key = self.form_key(key)
+            return r.hrandfield(key, **kwargs)

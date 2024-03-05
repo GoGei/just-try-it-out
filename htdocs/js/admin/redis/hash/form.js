@@ -2,8 +2,19 @@ let $form = $('#hashtableForm');
 
 $("#refreshBtn").click(function (e) {
     e.preventDefault();
-    clearFormErrors();
-    $form[0].reset();
+    // clearFormErrors();
+    // $form[0].reset();
+    let selectedValue = $('#id_hash_name').val();
+    $.get($form.attr('action'),
+        {
+            key: selectedValue
+        })
+        .done(function (response) {
+            applyResponse(response);
+        })
+        .fail(function (error) {
+            console.error(error);
+        });
 });
 
 $('#sendBtn').click(function (e) {
@@ -19,7 +30,7 @@ $('#sendBtn').click(function (e) {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (response) {
-            // console.log(response);
+            applyResponse(response)
         },
         error: function (xhr, textStatus, errorThrown) {
             displayFormErrors(xhr?.responseJSON);
@@ -49,7 +60,7 @@ $("#addRowBtn").click(function () {
         $(this).remove();
     });
 
-    $('.form_buttons').before(newRow);
+    $('#form-rows').append(newRow);
 });
 
 $(document).on('click', '.btn-drop-row', function () {
@@ -74,7 +85,7 @@ $(document).on('click', '.btn-drop-row', function () {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (response) {
-            console.log(response);
+            applyResponse(response)
         },
         error: function (err) {
             console.error(err);
@@ -162,6 +173,10 @@ function clearFormErrors() {
     });
 }
 
+function applyResponse(response) {
+    $('#form-rows').html(response);
+}
+
 $(document).ready(function () {
     let $hash_name = $('#id_hash_name');
 
@@ -191,7 +206,7 @@ $(document).ready(function () {
                     },
                     results: $.map(data, function (obj, index) {
                         return {
-                            id: index + 1,
+                            id: obj.key,
                             text: obj.key
                         };
                     })
@@ -207,10 +222,12 @@ $(document).ready(function () {
                 key: selectedValue
             })
             .done(function (response) {
-                console.log(response)
+                applyResponse(response);
             })
             .fail(function (error) {
                 console.error(error);
             });
     });
 });
+
+

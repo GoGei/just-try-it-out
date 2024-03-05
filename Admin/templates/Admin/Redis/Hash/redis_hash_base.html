@@ -6,7 +6,7 @@
 {% block breadcrumb %}
   {{ block.super }}
   <li>
-    <a href="{% host_url 'admin-redis-hash-table' host 'admin' scheme SITE_SCHEME %}">{% trans 'Hashes' %}</a>
+    <a href="{% host_url 'admin-redis-hash-table' host 'admin' %}">{% trans 'Hashes' %}</a>
   </li>
 {% endblock %}
 
@@ -14,10 +14,16 @@
   <div class="tabs-container">
     <ul class="nav nav-tabs">
       <li class="{% block activity-tab-hash-table %}{% endblock %}">
-        <a href="{% host_url 'admin-redis-hash-table' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Table' %}</a>
+        <a href="{% host_url 'admin-redis-hash-table' host 'admin' %}"> {% trans 'Table' %}</a>
       </li>
       <li class="{% block activity-tab-hash-form %}{% endblock %}">
-        <a href="{% host_url 'admin-redis-hash-form' host 'admin' scheme SITE_SCHEME %}"> {% trans 'Form' %}</a>
+        <a href="{% host_url 'admin-redis-hash-form' host 'admin' %}"> {% trans 'Form' %}</a>
+      </li>
+      <li class="{% block activity-tab-hash-info %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-hash-info' host 'admin' %}"> {% trans 'Info' %}</a>
+      </li>
+      <li class="{% block activity-tab-hash-random-fields %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-hash-random-fields' host 'admin' %}"> {% trans 'Random fields' %}</a>
       </li>
     </ul>
     <div class="tab-content">

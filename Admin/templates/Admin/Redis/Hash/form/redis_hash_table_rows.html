@@ -1,0 +1,7 @@
+{% load i18n %}
+
+{% for item in items %}
+  {% include 'Admin/Redis/Hash/form/redis_hash_table_row.html' with counter=forloop.counter0 item=item %}
+{% empty %}
+  {% include 'Admin/Redis/Hash/form/redis_hash_table_row.html' with counter=0 %}
+{% endfor %}

@@ -10,20 +10,8 @@
     {% include 'base_form_field.html' with field=form.body.hash_name %}
 
     {% csrf_token %}
-    <div class="form-group row">
-      <div class="form-group col col-lg-5">
-        <input type="text" name="key-1" class="form-control key-class" id="id_key1"
-               placeholder="{% trans 'Key' %}">
-      </div>
-      <div class="form-group col col-lg-5">
-        <input type="text" name="value-1" class="form-control value-class" id="id_value1"
-               placeholder="{% trans 'Value' %}">
-      </div>
-      <div class="form-group col col-lg-2">
-        <button class="btn btn-danger dim btn-drop-row" type="button" id="id_btn_delete{{ i }}"><i
-            class="fa fa-trash"></i>
-        </button>
-      </div>
+    <div id="form-rows">
+      {% include 'Admin/Redis/Hash/form/redis_hash_table_row.html' with counter=0 %}
     </div>
     <div class="form_buttons">
       <button class="btn btn-success dim" type="button" id="sendBtn"><i class="fa fa-send"></i></button>

@@ -1,0 +1,15 @@
+{% extends 'Admin/Redis/Hash/redis_hash_base.html' %}
+{% load static i18n hosts %}
+
+{% block activity-tab-hash-random-fields %}active{% endblock %}
+
+{% block breadcrumb %}
+  {{ block.super }}
+  <li>
+    <a href="{% host_url 'admin-redis-hash-random-fields' host 'admin' %}">{% trans 'Random fields' %}</a>
+  </li>
+{% endblock %}
+
+{% block tab-content %}
+  {% include 'Admin/Redis/Hash/components/redis_hash_form.html' %}
+{% endblock %}

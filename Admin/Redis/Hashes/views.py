@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 from django.utils.translation import ugettext_lazy as _
 from core.Utils.Access.decorators import manager_required
 from .forms import (
-    RedisHashTableForm, RedisHashForm
+    RedisHashTableForm, RedisHashForm, RedisHashInfoForm, RedisHashRandFieldsForm
 )
 
 
@@ -51,28 +51,24 @@ def redis_hash_keys(request):
 def redis_hash_form(request):
     form_body = RedisHashForm(user=request.user)
     if request.is_ajax():
-        response = {}
-        status = 200
+        items = []
         if request.method.lower() == 'get':
             key = request.GET.get('key')
-            response = form_body.get_key(key)
-            if response:
-                return JsonResponse(response, status=200, safe=False)
+            items = form_body.response_to_list_of_dicts(form_body.get_key(key))
 
-        if request.method.lower() == 'post':
+        elif request.method.lower() == 'post':
             data = json.loads(request.body)
             form_body.validate_create(data)
             errors = form_body.redis_errors
             if errors:
                 return JsonResponse(errors, status=400, safe=False)
 
-            response = form_body.create(data)
-            status = 201
-        if request.method.lower() == 'delete':
+            items = form_body.response_to_list_of_dicts(form_body.create(data))
+        elif request.method.lower() == 'delete':
             data = json.loads(request.body)
-            response = form_body.delete(data)
-            status = 200
-        return JsonResponse(response, status=status, safe=False)
+            items = form_body.response_to_list_of_dicts(form_body.delete(data))
+
+        return render(request, 'Admin/Redis/Hash/form/redis_hash_table_rows.html', {'items': items})
 
     context = {
         'form': {
@@ -82,3 +78,48 @@ def redis_hash_form(request):
         }
     }
     return render(request, 'Admin/Redis/Hash/redis_hash_form.html', context)
+
+
+@manager_required
+def redis_hash_info(request):
+    form_body = RedisHashInfoForm(user=request.user)
+    if request.is_ajax():
+        response = {}
+        if request.method.lower() == 'get':
+            key = request.GET.get('key')
+            response = form_body.get_key_info(key)
+        return render(request, 'Admin/Redis/Hash/form/redis_hash_table_info.html', response)
+
+    context = {
+        'form': {
+            'body': form_body,
+            'data_keys_url': reverse('admin-redis-hash-keys', host='admin'),
+            'action_url': reverse('admin-redis-hash-info', host='admin'),
+        }
+    }
+    return render(request, 'Admin/Redis/Hash/redis_hash_table_info.html', context)
+
+
+@manager_required
+def redis_hash_random_fields(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-hash-randon-fields', host='admin'))
+
+    body = RedisHashRandFieldsForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.rand_fields()
+            msg = _(f'Random fields executed with result: {result}')
+            messages.info(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    context = {
+        'form': {
+            'body': body,
+            'title': _('Hash random fields'),
+            'buttons': {'submit': True, 'cancel': True}
+        }
+    }
+    return render(request, 'Admin/Redis/Hash/redis_hash_random_fields.html', context)

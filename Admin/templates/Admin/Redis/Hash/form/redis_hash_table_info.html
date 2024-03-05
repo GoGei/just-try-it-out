@@ -1,0 +1,27 @@
+{% load i18n %}
+<div>
+  {% if keys %}
+    <div>{% trans 'Keys' %} {% if hlen %}({{ hlen }}){% endif %}: {{ keys|join:', ' }}</div>
+  {% endif %}
+  {% if values %}
+    <div>{% trans 'Values' %}: {{ values|join:', ' }}</div>
+  {% endif %}
+  <div>
+    {% if full_table %}
+      <table>
+        <thead>
+        <tr>
+          <th>{% trans 'Key' %}</th>
+          <th>{% trans 'Value' %}</th>
+        </tr>
+        </thead>
+        {% for key, value in full_table.items %}
+          <tr>
+            <td> {{ key }}:</td>
+            <td> {{ value }} </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+  </div>
+</div>
