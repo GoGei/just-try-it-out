@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 from django.utils.translation import ugettext_lazy as _
 from core.Utils.Access.decorators import manager_required
 from .forms import (
-    RedisHashTableForm, RedisHashForm, RedisHashInfoForm
+    RedisHashTableForm, RedisHashForm, RedisHashInfoForm, RedisHashRandFieldsForm
 )
 
 
@@ -98,3 +98,28 @@ def redis_hash_info(request):
         }
     }
     return render(request, 'Admin/Redis/Hash/redis_hash_table_info.html', context)
+
+
+@manager_required
+def redis_hash_random_fields(request):
+    if '_cancel' in request.POST:
+        return redirect(reverse('admin-redis-hash-randon-fields', host='admin'))
+
+    body = RedisHashRandFieldsForm(request.POST or None, user=request.user)
+    if body.is_valid():
+        try:
+            result = body.rand_fields()
+            msg = _(f'Random fields executed with result: {result}')
+            messages.info(request, msg)
+        except Exception as e:
+            msg = _(f'Command raised exception: {str(e)}')
+            messages.error(request, msg)
+
+    context = {
+        'form': {
+            'body': body,
+            'title': _('Hash random fields'),
+            'buttons': {'submit': True, 'cancel': True}
+        }
+    }
+    return render(request, 'Admin/Redis/Hash/redis_hash_random_fields.html', context)

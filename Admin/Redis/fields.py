@@ -14,13 +14,14 @@ class KeyWithOptionsField(KeyField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('label', _('Key'))
         attrs = kwargs.pop('attrs', {})
+        with_tags = kwargs.pop('with_tags', False)
         options = kwargs.pop('options', [])
 
         attrs.update({
             'class': 'form-control select2',
             'data-select-2-config': {
                 'placeholder': _('Enter options'),
-                'tags': 'true',
+                'tags': 'true' if with_tags else '',
                 'width': '100%',
             }
         })

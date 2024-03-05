@@ -22,7 +22,9 @@
       <li class="{% block activity-tab-hash-info %}{% endblock %}">
         <a href="{% host_url 'admin-redis-hash-info' host 'admin' %}"> {% trans 'Info' %}</a>
       </li>
-
+      <li class="{% block activity-tab-hash-random-fields %}{% endblock %}">
+        <a href="{% host_url 'admin-redis-hash-random-fields' host 'admin' %}"> {% trans 'Random fields' %}</a>
+      </li>
     </ul>
     <div class="tab-content">
       <div class="tab-pane active">
