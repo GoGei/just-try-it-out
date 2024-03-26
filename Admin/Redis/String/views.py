@@ -1,7 +1,7 @@
 from django_hosts import reverse
 from django.contrib import messages
 from django.shortcuts import render, redirect
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from core.Utils.Access.decorators import manager_required
 from .forms import (
     RedisStringSetForm, RedisStringTableForm, RedisStringDeleteForm, RedisStringCounterForm, RedisStringGetDelForm,

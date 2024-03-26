@@ -1,7 +1,7 @@
-from django.conf.urls import url
+from django.urls import re_path
 from . import views
 
 urlpatterns = [
-    url(r'login/$', views.login_view, name='admin-login'),
-    url(r'logout/$', views.logout_view, name='admin-logout'),
+    re_path(r'login/$', views.login_view, name='admin-login'),
+    re_path(r'logout/$', views.logout_view, name='admin-logout'),
 ]

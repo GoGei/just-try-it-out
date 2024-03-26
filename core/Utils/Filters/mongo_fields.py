@@ -1,5 +1,5 @@
 import django_mongoengine_filter
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 
 class MongoDBNullChoiceFilter(django_mongoengine_filter.ChoiceFilter):
