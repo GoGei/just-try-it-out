@@ -1,0 +1,21 @@
+{% extends 'Admin/admin_base.html' %}
+{% load static i18n hosts %}
+
+{% block menu-logger-active %} active {% endblock %}
+
+{% block action-area %}
+  <a type="button" class="btn btn-w-m btn-primary"
+     href="{% host_url 'admin-logger-trigger' host 'admin' %}">{% trans 'Trigger' %}</a>
+  <a type="button" class="btn btn-w-m btn-primary"
+     href="{% host_url 'admin-logger-trigger-with-error' host 'admin' %}">{% trans 'No logging' %}</a>
+  <a type="button" class="btn btn-w-m btn-primary"
+     href="{% host_url 'admin-logger-trigger-params' 10 'string' host 'admin' %}">{% trans 'With params' %}</a>
+{% endblock %}
+
+{% block breadcrumb %}
+  {{ block.super }}
+  <li>
+    <a href="{% host_url 'admin-logger-list' host 'admin' %}">{% trans 'Logger' %}</a>
+  </li>
+{% endblock %}
+

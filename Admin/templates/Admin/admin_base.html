@@ -58,6 +58,12 @@
             <span class="nav-label">{% trans 'Home' %}</span>
           </a>
         </li>
+        <li class="{% block menu-logger-active %}{% endblock %}">
+          <a href="{% host_url 'admin-logger-list' host 'admin' %}">
+            <i class="fa fa-pencil"></i>
+            <span class="nav-label">{% trans 'Logger' %}</span>
+          </a>
+        </li>
         <li class="{% block menu-redis-active %}{% endblock %}">
           <a href="#"><i class="icon-redis"></i> <span class="nav-label">{% trans 'Redis' %} </span><span
               class="fa arrow"></span></a>
@@ -105,16 +111,27 @@
         </ul>
       </nav>
     </div>
-    <div class="row wrapper border-bottom white-bg page-heading">
-      <div class="col-lg-10">
-        <h2>{% block page-title %}{% trans 'Home' %}{% endblock %}</h2>
-        <ol class="breadcrumb">
-          {% block breadcrumb %}
-            <li>
-              <a href="{% host_url 'admin-index' host 'admin' %}">{% trans 'Home' %}</a>
-            </li>
+    <div class="row">
+      <div class="col-xs-12 col-sm-6 col-md-8">
+        <div class="row wrapper border-bottom white-bg page-heading">
+          <div class="col-lg-10">
+            <h2>{% block page-title %}{% trans 'Home' %}{% endblock %}</h2>
+            <ol class="breadcrumb">
+              {% block breadcrumb %}
+                <li>
+                  <a href="{% host_url 'admin-index' host 'admin' %}">{% trans 'Home' %}</a>
+                </li>
+              {% endblock %}
+            </ol>
+          </div>
+        </div>
+
+      </div>
+      <div class="col-xs-6 col-md-4">
+        <div class="center">
+          {% block action-area %}
           {% endblock %}
-        </ol>
+        </div>
       </div>
     </div>
 
