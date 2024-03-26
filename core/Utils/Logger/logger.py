@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.utils import timezone
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from mongoengine import connection
 from .enums import LevelChoices
 
@@ -21,7 +21,7 @@ class Logger(object):
         data = {'stamp': timezone.now(),
                 'level': level,
                 'key': key,
-                'description': force_text(description).format(**kwargs)}
+                'description': force_str(description).format(**kwargs)}
         data.update(**kwargs)
         collection.insert_one(data)
 
