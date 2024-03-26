@@ -6,4 +6,5 @@ urlpatterns = [
     url('^', include('Admin.Login.urls')),
 
     url('^redis/', include('Admin.Redis.urls')),
+    url('^logger/', include('Admin.Logger.urls')),
 ]

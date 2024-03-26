@@ -1,0 +1,17 @@
+{% extends 'Admin/Logger/logger_base.html' %}
+{% load i18n static hosts %}
+
+{% block pagetitle %}
+  {% trans 'Objects log' %}
+{% endblock %}
+
+{% block breadcrumbs %}
+  {{ block.super }}
+  <li class="breadcrumb-item" aria-current="page">
+    <a href="{% host_url 'admin-logger-objects-list' host 'admin' %}">{% trans 'Objects log' %}</a>
+  </li>
+{% endblock %}
+
+{% block content %}
+  {% include 'base_table.html' with table=table %}
+{% endblock %}
